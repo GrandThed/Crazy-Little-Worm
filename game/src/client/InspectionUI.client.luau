@@ -11,6 +11,8 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -24,6 +26,26 @@ local focusedStand: BasePart? = nil -- stand we're manning; nil = UI closed
 local counterGuests: { [BasePart]: Model? } = {} -- latest server truth per stand
 local currentGuestModel: Model? = nil -- guest the card is showing
 local pendingRequests: { [string]: boolean } = {}
+local animating = false -- G-3: hold renders while the stamp/slide plays
+
+local rng = Random.new()
+
+-- Grey-box audio (G-3): Roblox built-in sounds; final SFX swap in later.
+-- Pitch variance keeps stamp #20 from sounding like stamp #1.
+local function playSound(soundId: string, pitch: number, volume: number)
+	local sound = Instance.new("Sound")
+	sound.SoundId = soundId
+	sound.PlaybackSpeed = pitch * (1 + rng:NextNumber(-0.06, 0.06))
+	sound.Volume = volume
+	sound.Parent = SoundService
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+	sound:Play()
+end
+
+local STAMP_SOUND = "rbxasset://sounds/snap.mp3"
+local COIN_SOUND = "rbxasset://sounds/electronicpingshort.wav"
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "InspectionUI"
@@ -102,6 +124,100 @@ end
 local approveButton = makeVerdictButton("APPROVE", Color3.fromRGB(76, 175, 80), 0.27)
 local denyButton = makeVerdictButton("DENY", Color3.fromRGB(211, 76, 60), 0.73)
 
+local refreshFromServerTruth -- defined below; animation end re-renders through it
+
+-- G-3: rubber-stamp overlay (grey-box for the stamp model asset)
+local CARD_HOME = card.Position
+local stamp = Instance.new("TextLabel")
+stamp.Name = "Stamp"
+stamp.AnchorPoint = Vector2.new(0.5, 0.5)
+stamp.Position = UDim2.fromScale(0.5, 0.42)
+stamp.Size = UDim2.fromOffset(240, 64)
+stamp.BackgroundTransparency = 1
+stamp.Font = Enum.Font.GothamBlack
+stamp.TextSize = 44
+stamp.TextTransparency = 1
+stamp.Rotation = -12
+stamp.ZIndex = 5
+stamp.Text = ""
+stamp.Parent = card
+local stampStroke = Instance.new("UIStroke")
+stampStroke.Thickness = 3
+stampStroke.Transparency = 1
+stampStroke.Parent = stamp
+local stampScale = Instance.new("UIScale")
+stampScale.Scale = 1
+stampScale.Parent = stamp
+
+-- G-3: coin that flies from the card to the cash HUD on approve
+local function flyCoin()
+	local coin = Instance.new("TextLabel")
+	coin.AnchorPoint = Vector2.new(0.5, 0.5)
+	coin.Position = card.Position - UDim2.fromOffset(0, 220)
+	coin.Size = UDim2.fromOffset(60, 28)
+	coin.BackgroundTransparency = 1
+	coin.TextColor3 = Color3.fromRGB(140, 220, 140)
+	coin.Font = Enum.Font.GothamBold
+	coin.TextSize = 22
+	coin.Text = "+$10"
+	coin.ZIndex = 10
+	coin.Parent = screenGui
+	playSound(COIN_SOUND, 1.4, 0.4)
+	local tween = TweenService:Create(
+		coin,
+		TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{ Position = UDim2.fromOffset(80, 30), TextTransparency = 0.6 }
+	)
+	tween.Completed:Once(function()
+		coin:Destroy()
+	end)
+	tween:Play()
+end
+
+-- Stamp slam → hold → card slides away → reset → render whatever is current
+local function playVerdictAnimation(verdict: "Approve" | "Deny")
+	animating = true
+	local isApprove = verdict == "Approve"
+	local color = if isApprove then Color3.fromRGB(46, 140, 62) else Color3.fromRGB(178, 44, 44)
+	stamp.Text = if isApprove then "APPROVED" else "DENIED"
+	stamp.TextColor3 = color
+	stampStroke.Color = color
+	stampScale.Scale = 1.7
+	stamp.TextTransparency = 0
+	stampStroke.Transparency = 0
+	playSound(STAMP_SOUND, if isApprove then 1 else 0.75, 0.6)
+
+	local slam = TweenService:Create(
+		stampScale,
+		TweenInfo.new(0.09, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+		{ Scale = 1 }
+	)
+	slam:Play()
+	if isApprove then
+		flyCoin()
+	end
+
+	task.delay(0.32, function()
+		local slide = TweenService:Create(
+			card,
+			TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+			{
+				Position = CARD_HOME + UDim2.fromOffset(0, 260),
+				Rotation = if isApprove then 6 else -6,
+			}
+		)
+		slide.Completed:Once(function()
+			card.Position = CARD_HOME
+			card.Rotation = 0
+			stamp.TextTransparency = 1
+			stampStroke.Transparency = 1
+			animating = false
+			refreshFromServerTruth()
+		end)
+		slide:Play()
+	end)
+end
+
 local function renderGuest(guestModel: Model?)
 	currentGuestModel = guestModel
 	if not guestModel then
@@ -120,7 +236,10 @@ local function renderGuest(guestModel: Model?)
 	denyButton.Visible = true
 end
 
-local function refreshFromServerTruth()
+function refreshFromServerTruth()
+	if animating then
+		return -- animation end re-invokes this with the stored server truth
+	end
 	local stand = focusedStand
 	renderGuest(if stand then counterGuests[stand] else nil)
 end
@@ -145,8 +264,10 @@ local function sendVerdict(verdict: "Approve" | "Deny")
 		guestId = guestModel:GetAttribute("GuestId"),
 		verdict = verdict,
 	})
-	-- Optimistic: resolve the card now; CounterChanged brings the next guest
-	renderGuest(nil)
+	-- Optimistic: stamp and clear the card now; CounterChanged brings the
+	-- next guest and the animation end renders it
+	currentGuestModel = nil
+	playVerdictAnimation(verdict)
 end
 
 approveButton.Activated:Connect(function()

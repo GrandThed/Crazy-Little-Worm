@@ -92,8 +92,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-- **G-3** (S) Inspection juice · code: tween/sound hooks in InspectionUI · assets: stamp model + 2 stamp SFX, coin SFX, coin-fly particle · ✔ still satisfying after 20 stamps in a row
-- **G-8** (S) Economy v0 · code: `server/EconomyStore` (replicated), cash HUD · assets: none · ✔ day income = admissions × fee; deny pays nothing
+*(empty — groom from Backlog)*
 
 ---
 
@@ -105,7 +104,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **G-4** (M) Queue patience · code: patience decay + walkaway in `server/Guests`, Walkaways stat through summary/HUD/debug · assets: anger emote billboards (😐😠🤬 at ≤60/≤30/≤10 patience) · ✔ an ignored queue visibly drains itself · *needs Studio test: Open gates, don't man the stand (or press debug "Sap patience") — faces appear over heads, guests storm off one by one, walkout counter ticks, Summary shows Walkaways*
+- **G-8** (S) Economy v0 · code: `server/EconomyStore` (add/trySpend, replicated Cash), `client/CashHUD` · assets: none · ✔ day income = admissions × fee; deny pays nothing · *test: cash starts $500, +$10 per approve, nothing on deny; debug "Give $500" works*
+- **G-3** (S) Inspection juice · code: stamp overlay + card slide tweens, pitched SFX, coin fly in InspectionUI · assets: grey-box (built-in sounds, UI stamp — final stamp model/SFX later) · ✔ still satisfying after 20 stamps in a row · *test: stamp 20 guests fast — feel check is the acceptance*
 
 ---
 
@@ -113,6 +113,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 **🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
 
+- **G-4** (M) Queue patience · ✔ Studio-tested 2026-08-18: queue + counter decay, emotes at thresholds, walkaways drain an unmanned stand (after counter-guest fix)
 - **G-2** (M) Ticket inspection UI · ✔ Studio-tested 2026-08-18: instant optimistic decisions, authoritative server log, close-button fix verified; 2-player check deferred to next co-op session
 - **F-5** (M) Debug panel · ✔ Studio-tested 2026-08-18: speed/skip/spawn/drain + live stats all working from the panel
 - **G-5** (M) Day cycle skeleton · ✔ Studio-tested 2026-08-18: full Prep → Open → Closing → Summary → Day 2 loop; arrivals only while Open; park drains at Summary
