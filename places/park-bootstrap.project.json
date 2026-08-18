@@ -9,36 +9,99 @@
 					"$className": "Part",
 					"$properties": {
 						"Anchored": true,
-						"Size": [2, 12, 2],
-						"Position": [-8, 6, -60],
-						"Color": [0.88, 0.34, 0.31],
+						"Size": [
+							2,
+							12,
+							2
+						],
+						"Color": [
+							0.88,
+							0.34,
+							0.31
+						],
 						"Material": "SmoothPlastic",
 						"TopSurface": "Smooth",
-						"BottomSurface": "Smooth"
+						"BottomSurface": "Smooth",
+						"CFrame": [
+							-8,
+							6,
+							-60,
+							1,
+							0,
+							0,
+							0,
+							1,
+							0,
+							0,
+							0,
+							1
+						]
 					}
 				},
 				"PillarRight": {
 					"$className": "Part",
 					"$properties": {
 						"Anchored": true,
-						"Size": [2, 12, 2],
-						"Position": [8, 6, -60],
-						"Color": [0.88, 0.34, 0.31],
+						"Size": [
+							2,
+							12,
+							2
+						],
+						"Color": [
+							0.88,
+							0.34,
+							0.31
+						],
 						"Material": "SmoothPlastic",
 						"TopSurface": "Smooth",
-						"BottomSurface": "Smooth"
+						"BottomSurface": "Smooth",
+						"CFrame": [
+							8,
+							6,
+							-60,
+							1,
+							0,
+							0,
+							0,
+							1,
+							0,
+							0,
+							0,
+							1
+						]
 					}
 				},
 				"Crossbar": {
 					"$className": "Part",
 					"$properties": {
 						"Anchored": true,
-						"Size": [18, 2, 2],
-						"Position": [0, 13, -60],
-						"Color": [0.97, 0.66, 0.13],
+						"Size": [
+							18,
+							2,
+							2
+						],
+						"Color": [
+							0.97,
+							0.66,
+							0.13
+						],
 						"Material": "SmoothPlastic",
 						"TopSurface": "Smooth",
-						"BottomSurface": "Smooth"
+						"BottomSurface": "Smooth",
+						"CFrame": [
+							0,
+							13,
+							-60,
+							1,
+							0,
+							0,
+							0,
+							1,
+							0,
+							0,
+							0,
+							1
+						]
 					}
 				}
 			},
@@ -46,19 +109,46 @@
 				"$className": "Part",
 				"$properties": {
 					"Anchored": true,
-					"Size": [4, 3.5, 2],
-					"Position": [14, 1.75, -60],
-					"Color": [0.25, 0.55, 0.84],
+					"Size": [
+						4,
+						3.5,
+						2
+					],
+					"Color": [
+						0.25,
+						0.55,
+						0.84
+					],
 					"Material": "SmoothPlastic",
 					"TopSurface": "Smooth",
 					"BottomSurface": "Smooth",
-					"Tags": ["EntryStand"],
+					"Tags": [
+						"EntryStand"
+					],
 					"Attributes": {
 						"Attributes": {
-							"StandId": { "Float64": 1 },
-							"QueueCapacity": { "Float64": 8 }
+							"StandId": {
+								"Float64": 1
+							},
+							"QueueCapacity": {
+								"Float64": 8
+							}
 						}
-					}
+					},
+					"CFrame": [
+						14,
+						1.75,
+						-60,
+						1,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						1
+					]
 				}
 			},
 			"GuestSpawn": {
@@ -67,9 +157,28 @@
 					"Anchored": true,
 					"CanCollide": false,
 					"Transparency": 1,
-					"Size": [4, 1, 4],
-					"Position": [14, 0.5, -90],
-					"Tags": ["GuestSpawn"]
+					"Size": [
+						4,
+						1,
+						4
+					],
+					"Tags": [
+						"GuestSpawn"
+					],
+					"CFrame": [
+						14,
+						0.5,
+						-90,
+						1,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						1
+					]
 				}
 			},
 			"Baseplate": {
@@ -77,21 +186,59 @@
 				"$properties": {
 					"Anchored": true,
 					"Locked": true,
-					"Size": [512, 4, 512],
-					"Position": [0, -2, 0],
-					"Color": [0.45, 0.78, 0.42],
+					"Size": [
+						512,
+						4,
+						512
+					],
+					"Color": [
+						0.45,
+						0.78,
+						0.42
+					],
 					"TopSurface": "Smooth",
-					"BottomSurface": "Smooth"
+					"BottomSurface": "Smooth",
+					"CFrame": [
+						0,
+						-2,
+						0,
+						1,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						1
+					]
 				}
 			},
 			"SpawnLocation": {
 				"$className": "SpawnLocation",
 				"$properties": {
 					"Anchored": true,
-					"Size": [12, 1, 12],
-					"Position": [0, 0.5, 0],
+					"Size": [
+						12,
+						1,
+						12
+					],
 					"Neutral": true,
-					"Duration": 0
+					"Duration": 0,
+					"CFrame": [
+						0,
+						0.5,
+						0,
+						1,
+						0,
+						0,
+						0,
+						1,
+						0,
+						0,
+						0,
+						1
+					]
 				}
 			}
 		},
