@@ -102,7 +102,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-- **F-3** (S) CI pipeline · code: GitHub Actions workflow (StyLua check + Selene) · assets: none · ✔ red X on a badly formatted push
+*(empty — pull from Ready)*
 
 ---
 
@@ -114,6 +114,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## ✅ Done
 
+- **F-3** (S) CI pipeline · ✔ verified 2026-08-18: green run on main; deliberately bad push got a red X (scratch branch, since deleted)
 - **F-2** (M) Toolchain skeleton · ✔ Studio-tested 2026-08-18: `rojo serve` synced into `park.rbxl`, server + client prints in Output
 - **F-1** (S) Git init + `.gitignore` + first commit of docs · ✔ `git log` shows docs committed
 - **D-1** Game design doc: three systems, formulas, 5 anomalies, day cycle, catalog, engagement loops (docs/game-design.md)
