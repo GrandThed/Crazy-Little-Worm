@@ -61,7 +61,7 @@ places/                # lobby.rbxl, park.rbxl
 
 ## Workflow
 
-Task tracking lives in [BOARD.md](BOARD.md) (kanban). Rules that bind Claude sessions too: pull from Ready right-to-left, WIP ≤ 2, every feature card carries `code:` and `assets:` lines, and every feature follows the board's grey-box-first feature flow (code never waits for final art; assets bind via tag + attributes so art swaps are zero-code). Move cards as work starts/finishes and keep acceptance criteria honest.
+Task tracking lives in [BOARD.md](BOARD.md) (kanban) — view it as a board with `node tools/board-viewer/serve.mjs` (VS Code task: *Board: viewer (live)*); see [tools/board-viewer/README.md](tools/board-viewer/README.md). Rules that bind Claude sessions too: pull from Ready right-to-left, WIP ≤ 2, every feature card carries `code:` and `assets:` lines, and every feature follows the board's grey-box-first feature flow (code never waits for final art; assets bind via tag + attributes so art swaps are zero-code). Move cards as work starts/finishes and keep acceptance criteria honest.
 
 ## Build order
 

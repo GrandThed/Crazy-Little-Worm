@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crazy Little Worm — Board</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --plane: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --muted: #898781;
+    --hairline: #e1e0d9;
+    --baseline: #c3c2b7;
+    --ring: rgba(11, 11, 11, 0.10);
+    --track: #ebeae4;
+    --good: #0ca30c;
+    --warning: #fab219;
+    --critical: #d03b3b;
+    --e1: #2a78d6; --e2: #eb6834; --e3: #1baf7a; --e4: #eda100;
+    --e5: #e87ba4; --e6: #008300; --e7: #4a3aa7; --e8: #e34948;
+    --tint: 13%;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --plane: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --muted: #898781;
+      --hairline: #2c2c2a;
+      --baseline: #383835;
+      --ring: rgba(255, 255, 255, 0.10);
+      --track: #262624;
+      --e1: #3987e5; --e2: #d95926; --e3: #199e70; --e4: #c98500;
+      --e5: #d55181; --e6: #008300; --e7: #9085e9; --e8: #e66767;
+      --tint: 20%;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --plane: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #898781;
+    --hairline: #2c2c2a;
+    --baseline: #383835;
+    --ring: rgba(255, 255, 255, 0.10);
+    --track: #262624;
+    --e1: #3987e5; --e2: #d95926; --e3: #199e70; --e4: #c98500;
+    --e5: #d55181; --e6: #008300; --e7: #9085e9; --e8: #e66767;
+    --tint: 20%;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--text-primary);
+    font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  h1, h2, h3 { margin: 0; font-weight: 600; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* ── top bar ───────────────────────────────────────────────────────────── */
+  header.bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 10px 16px;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--hairline);
+  }
+  header.bar h1 { font-size: 14px; letter-spacing: -0.01em; }
+  .milestone {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--ring); color: var(--text-secondary);
+  }
+  .spacer { flex: 1; }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+  .dot.off { background: var(--critical); }
+  .dot.flash { animation: flash 0.9s ease-out; }
+  @keyframes flash { 0% { transform: scale(2.2); } 100% { transform: scale(1); } }
+
+  input[type="search"], .toggle {
+    background: var(--plane); color: var(--text-primary);
+    border: 1px solid var(--ring); border-radius: 6px;
+    padding: 4px 8px; font: inherit;
+  }
+  input[type="search"] { width: 190px; }
+  .toggle[aria-pressed="true"] { background: color-mix(in srgb, var(--text-primary) 10%, var(--plane)); }
+
+  /* ── stat strip ────────────────────────────────────────────────────────── */
+  .stats { display: flex; gap: 10px; padding: 12px 16px 0; flex-wrap: wrap; }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--hairline); border-radius: 8px;
+    padding: 8px 12px; min-width: 104px;
+  }
+  .tile .label { font-size: 11px; color: var(--text-secondary); display: flex; gap: 5px; align-items: center; }
+  .tile .value { font-size: 22px; line-height: 1.15; margin-top: 2px; }
+  .tile .sub { font-size: 11px; color: var(--muted); }
+  .tile .sub.over { color: var(--critical); font-weight: 600; }
+
+  .meter { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; margin-top: 6px; display: flex; }
+  .meter > span { height: 100%; border-radius: 3px; }
+
+  /* ── epic progress ─────────────────────────────────────────────────────── */
+  details.epics { margin: 12px 16px 0; }
+  details.epics > summary {
+    cursor: pointer; font-size: 11px; color: var(--text-secondary);
+    padding: 4px 0; user-select: none;
+  }
+  .epic-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 8px 16px; padding: 8px 0 2px;
+  }
+  .epic-row { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; }
+  .epic-row .name { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .epic-row .frac { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .letter {
+    width: 22px; height: 22px; display: grid; place-items: center;
+    border-radius: 6px; font-size: 11px; font-weight: 700;
+    background: color-mix(in srgb, var(--epic) var(--tint), var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--epic) 55%, transparent);
+  }
+
+  /* ── board ─────────────────────────────────────────────────────────────── */
+  /* Columns never collapse into rows: they keep a floor width and the board
+     scrolls sideways, so the kanban always reads left-to-right. */
+  .board {
+    flex: 1; min-height: 0;
+    display: grid; gap: 12px; padding: 12px 16px 16px;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(250px, 1fr);
+    align-items: stretch;
+    overflow: auto;
+    overscroll-behavior-x: contain;
+  }
+  .board::-webkit-scrollbar { height: 11px; width: 11px; }
+  .board::-webkit-scrollbar-thumb { background: var(--baseline); border-radius: 6px; border: 3px solid var(--plane); }
+  .board::-webkit-scrollbar-track { background: transparent; }
+
+  .col {
+    background: var(--surface-1); border: 1px solid var(--hairline); border-radius: 10px;
+    display: flex; flex-direction: column; min-height: 90px; min-width: 0; height: 100%;
+  }
+  .col > h2 {
+    position: sticky; top: 0; z-index: 2;
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; padding: 9px 11px;
+    background: var(--surface-1); border-bottom: 1px solid var(--hairline);
+    border-radius: 10px 10px 0 0;
+  }
+  .col > h2 .count { margin-left: auto; color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .col > h2 .wip { font-size: 11px; color: var(--muted); }
+  .col > h2 .wip.over { color: var(--critical); font-weight: 700; }
+  .col .body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 7px; }
+
+  .group-head {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 11px; color: var(--text-secondary);
+    padding: 6px 2px 1px;
+  }
+  .group-head .ms { color: var(--muted); }
+
+  .card {
+    border: 1px solid var(--hairline); border-left: 3px solid var(--epic, var(--baseline));
+    border-radius: 7px; background: var(--plane); padding: 7px 9px;
+    cursor: pointer; transition: border-color 0.12s ease, background 0.12s ease;
+  }
+  .card:hover { background: color-mix(in srgb, var(--epic) 6%, var(--plane)); }
+  .card .top { display: flex; align-items: baseline; gap: 6px; }
+  .card .id {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 1px 5px; border-radius: 4px;
+    background: color-mix(in srgb, var(--epic) var(--tint), var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--epic) 45%, transparent);
+    white-space: nowrap;
+  }
+  .card .size {
+    font-size: 10px; font-weight: 700; color: var(--text-secondary);
+    border: 1px solid var(--ring); border-radius: 4px; padding: 1px 4px;
+  }
+  .card .size.split { color: var(--critical); border-color: color-mix(in srgb, var(--critical) 50%, transparent); }
+  .card .title { font-size: 12.5px; line-height: 1.35; margin-top: 4px; }
+  .card .flags { display: flex; gap: 5px; margin-top: 5px; font-size: 10.5px; color: var(--muted); flex-wrap: wrap; }
+  .card .flags i { font-style: normal; }
+  .card .detail { display: none; margin-top: 7px; border-top: 1px dashed var(--hairline); padding-top: 6px; }
+  .card.open .detail { display: block; }
+  .card .detail dl { margin: 0; display: grid; grid-template-columns: 52px 1fr; gap: 3px 8px; }
+  .card .detail dt { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .card .detail dd { margin: 0; font-size: 11.5px; color: var(--text-secondary); }
+  .card .detail dd code { font-size: 11px; background: color-mix(in srgb, var(--text-primary) 7%, transparent); padding: 0 3px; border-radius: 3px; }
+  .card .detail .open-src { display: inline-block; margin-top: 7px; font-size: 11px; color: var(--muted); text-decoration: none; }
+  .card .detail .open-src:hover { color: var(--text-primary); text-decoration: underline; }
+  .card .blocked {
+    margin-top: 6px; font-size: 11px; padding: 4px 6px; border-radius: 5px;
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--critical) 14%, var(--surface-1));
+    border: 1px solid color-mix(in srgb, var(--critical) 45%, transparent);
+  }
+  .empty { color: var(--muted); font-size: 11.5px; font-style: italic; padding: 6px 2px; }
+  .col.done .card { opacity: 0.82; }
+
+  .warnings { margin: 0 16px 10px; font-size: 11.5px; color: var(--text-secondary); }
+  .warnings li code { color: var(--muted); }
+  footer.hint { padding: 0 16px 14px; font-size: 11px; color: var(--muted); }
+  kbd { border: 1px solid var(--ring); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; font: inherit; font-size: 10.5px; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1 id="title">Board</h1>
+  <span class="milestone" id="milestone" hidden></span>
+  <span class="spacer"></span>
+  <input type="search" id="q" placeholder="Filter cards…  ( / )" aria-label="Filter cards" />
+  <button class="toggle" id="details" aria-pressed="false" title="Expand every card (d)">Details</button>
+  <button class="toggle" id="hideDone" aria-pressed="false" title="Hide the Done column">Hide done</button>
+  <button class="toggle" id="theme" title="Toggle light / dark">◐</button>
+  <span class="live"><span class="dot" id="dot"></span><span id="liveText">live</span></span>
+</header>
+
+<section class="stats" id="stats" aria-label="Column counts"></section>
+
+<details class="epics" id="epicBox" open>
+  <summary>Epic progress — <span id="epicSummary"></span> (click an epic to filter)</summary>
+  <div class="epic-grid" id="epicGrid"></div>
+</details>
+
+<ul class="warnings" id="warnings" hidden></ul>
+
+<main class="board" id="board"></main>
+
+<footer class="hint">
+  Read-only view of <code id="src">BOARD.md</code> — edit the markdown, the board refreshes.
+  <kbd>/</kbd> filter · <kbd>d</kbd> details · <kbd>Esc</kbd> clear
+</footer>
+
+<script type="module">
+const $ = (sel) => document.querySelector(sel);
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+};
+
+const state = {
+  board: null,
+  query: "",
+  epics: new Set(),      // empty = show all
+  details: false,
+  hideDone: false,
+};
+
+const SIZE_TITLE = { S: "small — ≤2h", M: "medium — ≤half day", L: "large — must be split" };
+const sizeTitle = (s) => SIZE_TITLE[(s ?? "").trim().toUpperCase()] ?? s ?? "";
+
+function cardText(c) {
+  return [c.id, c.title, c.code, c.assets, c.criteria, c.blocked, ...(c.notes ?? [])].filter(Boolean).join(" ").toLowerCase();
+}
+const visible = (c) =>
+  (state.epics.size === 0 || state.epics.has(c.epic)) &&
+  (state.query === "" || cardText(c).includes(state.query));
+
+function srcHref(line) {
+  const p = state.board?.source?.path;
+  if (!p) return null;
+  return `vscode://file/${p.replaceAll("\\", "/")}:${line}`;
+}
+
+/* ── cards ───────────────────────────────────────────────────────────────── */
+function renderCard(card) {
+  const node = el("article", "card");
+  node.style.setProperty("--epic", `var(--e${slotOf(card.epic)})`);
+  node.dataset.id = card.id;
+  if (state.details) node.classList.add("open");
+
+  const top = el("div", "top");
+  top.append(el("span", "id", card.id));
+  if (card.size) {
+    const s = el("span", "size" + (card.needsSplit ? " split" : ""), card.size);
+    s.title = sizeTitle(card.size);
+    top.append(s);
+  }
+  node.append(top, el("div", "title", card.title));
+
+  const flags = el("div", "flags");
+  if (card.code) flags.append(el("i", null, "⌨ code"));
+  if (card.assets && !/^none/i.test(card.assets)) flags.append(el("i", null, "▣ assets"));
+  if (card.criteria) flags.append(el("i", null, "✔ criteria"));
+  if (flags.childElementCount) node.append(flags);
+
+  if (card.blocked) node.append(el("div", "blocked", `⛔ blocked: ${card.blocked}`));
+
+  const detail = el("div", "detail");
+  const dl = el("dl");
+  const row = (k, v) => {
+    if (!v) return;
+    dl.append(el("dt", null, k));
+    const dd = el("dd");
+    // back-tick spans in the markdown are module paths — keep them monospaced
+    v.split(/(`[^`]+`)/).forEach((chunk) => {
+      if (chunk.startsWith("`") && chunk.endsWith("`")) dd.append(el("code", null, chunk.slice(1, -1)));
+      else if (chunk) dd.append(document.createTextNode(chunk));
+    });
+    dl.append(dd);
+  };
+  row("code", card.code);
+  row("assets", card.assets);
+  row("✔", card.criteria);
+  (card.notes ?? []).forEach((n) => row("note", n));
+  detail.append(dl);
+
+  const href = srcHref(card.line);
+  if (href) {
+    const a = el("a", "open-src", `open BOARD.md:${card.line} ↗`);
+    a.href = href;
+    a.addEventListener("click", (e) => e.stopPropagation());
+    detail.append(a);
+  }
+  node.append(detail);
+
+  node.addEventListener("click", () => node.classList.toggle("open"));
+  return node;
+}
+
+const slotOf = (letter) => state.board?.epics.find((e) => e.letter === letter)?.slot ?? 8;
+
+/* ── columns ─────────────────────────────────────────────────────────────── */
+function renderBoard() {
+  const board = $("#board");
+  board.textContent = "";
+
+  for (const col of state.board.columns) {
+    if (state.hideDone && col.key === "done") continue;
+
+    const groups = col.groups
+      .map((g) => ({ ...g, cards: g.cards.filter(visible) }))
+      .filter((g) => g.cards.length);
+    const shown = groups.reduce((n, g) => n + g.cards.length, 0);
+
+    const section = el("section", `col ${col.key}`);
+    const head = el("h2");
+    head.append(el("span", null, col.icon), el("span", null, col.name));
+    if (col.wipLimit) {
+      const wip = el("span", "wip" + (col.count > col.wipLimit ? " over" : ""), `WIP ≤ ${col.wipLimit}`);
+      head.append(wip);
+    }
+    head.append(el("span", "count", shown === col.count ? String(col.count) : `${shown}/${col.count}`));
+    section.append(head);
+
+    const body = el("div", "body");
+    if (!shown) {
+      body.append(el("div", "empty", col.count ? "no cards match the filter" : "(empty)"));
+    } else {
+      const multi = groups.length > 1;
+      for (const g of groups) {
+        if (multi) {
+          const gh = el("div", "group-head");
+          const letter = el("span", "letter", g.epic);
+          letter.style.setProperty("--epic", `var(--e${slotOf(g.epic)})`);
+          gh.append(letter, el("span", null, g.name || `Epic ${g.epic}`));
+          if (g.milestone) gh.append(el("span", "ms", g.milestone));
+          body.append(gh);
+        }
+        g.cards.forEach((c) => body.append(renderCard(c)));
+      }
+    }
+    section.append(body);
+    board.append(section);
+  }
+}
+
+/* ── stat tiles + epic meters ────────────────────────────────────────────── */
+function renderStats() {
+  const stats = $("#stats");
+  stats.textContent = "";
+
+  const total = state.board.columns.reduce((n, c) => n + c.count, 0);
+  const done = state.board.columns.find((c) => c.key === "done")?.count ?? 0;
+
+  for (const col of state.board.columns) {
+    const tile = el("div", "tile");
+    const label = el("div", "label");
+    label.append(el("span", null, col.icon), el("span", null, col.name));
+    tile.append(label, el("div", "value", String(col.count)));
+
+    if (col.wipLimit) {
+      const over = col.count > col.wipLimit;
+      tile.append(el("div", over ? "sub over" : "sub", over ? `over WIP limit ${col.wipLimit}` : `WIP limit ${col.wipLimit}`));
+    } else if (col.key === "done") {
+      tile.append(el("div", "sub", `${Math.round((done / Math.max(total, 1)) * 100)}% of ${total} cards`));
+      const meter = el("div", "meter");
+      const fill = el("span");
+      fill.style.width = `${(done / Math.max(total, 1)) * 100}%`;
+      fill.style.background = "var(--good)";
+      meter.append(fill);
+      tile.append(meter);
+    }
+    stats.append(tile);
+  }
+}
+
+function renderEpics() {
+  const grid = $("#epicGrid");
+  grid.textContent = "";
+  const epics = state.board.epics;
+  $("#epicSummary").textContent = `${epics.reduce((n, e) => n + e.done, 0)}/${epics.reduce((n, e) => n + e.total, 0)} cards done`;
+
+  for (const e of epics) {
+    const row = el("div", "epic-row");
+    row.style.setProperty("--epic", `var(--e${e.slot})`);
+    row.style.cursor = "pointer";
+    row.title = `Epic ${e.letter} — ${e.name}: ${e.done} of ${e.total} done${e.milestone ? ` · ${e.milestone}` : ""}`;
+
+    const letter = el("span", "letter", e.letter);
+    if (state.epics.size && !state.epics.has(e.letter)) row.style.opacity = "0.42";
+
+    const mid = el("div");
+    const name = el("div", "name", `${e.name}${e.milestone ? ` · ${e.milestone}` : ""}`);
+    const meter = el("div", "meter");
+    const fill = el("span");
+    fill.style.width = `${(e.done / Math.max(e.total, 1)) * 100}%`;
+    fill.style.background = "var(--epic)";
+    fill.style.marginRight = "2px"; /* surface gap between fill and track */
+    meter.append(fill);
+    mid.append(name, meter);
+
+    row.append(letter, mid, el("span", "frac", `${e.done}/${e.total}`));
+    row.addEventListener("click", () => {
+      if (state.epics.has(e.letter)) state.epics.delete(e.letter);
+      else state.epics.add(e.letter);
+      render();
+    });
+    grid.append(row);
+  }
+}
+
+function renderWarnings() {
+  const box = $("#warnings");
+  box.textContent = "";
+  const items = state.board.unparsed ?? [];
+  box.hidden = items.length === 0;
+  for (const u of items) {
+    const li = el("li");
+    li.append(document.createTextNode(`line ${u.line} in ${u.column}: not a card — `), el("code", null, u.text));
+    box.append(li);
+  }
+}
+
+function render() {
+  $("#title").textContent = state.board.title;
+  const ms = $("#milestone");
+  ms.hidden = !state.board.milestone;
+  ms.textContent = state.board.milestone ?? "";
+  $("#src").textContent = state.board.source?.relative ?? "BOARD.md";
+  renderStats();
+  renderEpics();
+  renderWarnings();
+  renderBoard();
+}
+
+/* ── data + live reload ──────────────────────────────────────────────────── */
+async function load(flash = false) {
+  const res = await fetch("/api/board", { cache: "no-store" });
+  state.board = await res.json();
+  const scroll = window.scrollY;
+  render();
+  window.scrollTo(0, scroll);
+  if (flash) {
+    const dot = $("#dot");
+    dot.classList.remove("flash");
+    void dot.offsetWidth;
+    dot.classList.add("flash");
+  }
+}
+
+// Connected after `load` so the open event stream never holds the page in a
+// perpetual "loading" state (headless screenshots, VS Code's Simple Browser).
+addEventListener("load", () => {
+  const events = new EventSource("/api/events");
+  events.addEventListener("board", () => load(true));
+  events.onopen = () => { $("#dot").classList.remove("off"); $("#liveText").textContent = "live"; };
+  events.onerror = () => { $("#dot").classList.add("off"); $("#liveText").textContent = "disconnected"; };
+});
+
+/* ── controls ────────────────────────────────────────────────────────────── */
+$("#q").addEventListener("input", (e) => { state.query = e.target.value.trim().toLowerCase(); renderBoard(); });
+$("#details").addEventListener("click", (e) => {
+  state.details = !state.details;
+  e.currentTarget.setAttribute("aria-pressed", String(state.details));
+  renderBoard();
+});
+$("#hideDone").addEventListener("click", (e) => {
+  state.hideDone = !state.hideDone;
+  e.currentTarget.setAttribute("aria-pressed", String(state.hideDone));
+  renderBoard();
+});
+$("#theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const current = root.dataset.theme ?? (dark ? "dark" : "light");
+  root.dataset.theme = current === "dark" ? "light" : "dark";
+});
+addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT") {
+    if (e.key === "Escape") { e.target.value = ""; state.query = ""; state.epics.clear(); render(); e.target.blur(); }
+    return;
+  }
+  if (e.key === "/") { e.preventDefault(); $("#q").focus(); }
+  if (e.key === "d") $("#details").click();
+  if (e.key === "Escape") { state.epics.clear(); render(); }
+});
+
+load();
+</script>
+</body>
+</html>

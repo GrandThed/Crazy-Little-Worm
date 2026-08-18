@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Board: viewer (live)",
+      "type": "process",
+      "command": "node",
+      "args": ["tools/board-viewer/serve.mjs", "--port", "4321"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": false
+      },
+      "detail": "Serves BOARD.md as a kanban board at http://127.0.0.1:4321 with live reload"
+    },
+    {
+      "label": "Board: viewer (open in browser)",
+      "type": "process",
+      "command": "node",
+      "args": ["tools/board-viewer/serve.mjs", "--port", "4321", "--open"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "silent", "panel": "dedicated", "close": false },
+      "detail": "Same viewer, but also opens your default browser"
+    }
+  ]
+}
