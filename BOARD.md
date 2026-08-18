@@ -41,7 +41,6 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic F — Foundation (M0)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
-- **G-9** (M) **Fun-check playtest** · code: none · assets: none · ✔ 3 full solo days played; go/no-go findings written into docs/game-design.md
 
 ### Epic P — Park sim (M2) — spec: §1, §2, §5, §6, §9
 - **P-1** (L→split) Guest needs AI · code: needs decay, urgency decisions, state machine, exit happiness · assets: none (uses guest rig)
@@ -96,13 +95,13 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-*(empty — pull from Ready)*
+- **G-9** (M) **Fun-check playtest** · owner: **Benjamin** · code: none · assets: none · ✔ 3 full solo days played at real speed (no debug ×); go/no-go findings written into docs/game-design.md · *note sheet: [docs/playtest-g9.md](docs/playtest-g9.md)*
 
 ---
 
 ## 👀 Review
 
-- **G-7** (S) Capture net + tool rack · code: `server/ToolRackService`, `Infected.netHit` · assets: net + wall-rack grey-box, evaporation puff particle, thumbs-up emote · ✔ solo player contains a 3-zombie outbreak · *needs Studio test: take net from rack by the gate (prompt), spawn infected + approve, let it cascade to 3 zombies, then swing (click) near each — zombies puff away, tagged guests cure with a 👍; `netted` counter climbs*
+*(empty)*
 
 ---
 
@@ -110,6 +109,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 **🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
 
+- **G-7** (S) Capture net + tool rack · ✔ Studio-tested 2026-08-18: solo containment of a 3-zombie outbreak; puff + thumbs-up resolution
 - **G-6** (M) Infected end-to-end · ✔ Studio-tested 2026-08-18: tells at gate, incubation, chase + tag cascade past 3 zombies
 - **G-8** (S) Economy v0 · ✔ Studio-tested 2026-08-18: $500 start, +$10 per approve, deny pays nothing
 - **G-3** (S) Inspection juice · ✔ Studio-tested 2026-08-18: stamp/slide/SFX/coin-fly loop feels good at speed
