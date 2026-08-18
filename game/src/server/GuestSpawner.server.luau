@@ -17,7 +17,9 @@ local GuestIdentity = require(ReplicatedStorage.Shared.GuestIdentity)
 
 local rigTemplate = ServerStorage:WaitForChild("Assets"):WaitForChild("GuestRig") :: Model
 
-local CURRENT_DAY = 1 -- placeholder until DayCycle lands (G-5)
+-- DayCycle (G-5) owns these: phase gating for arrivals, per-day counters
+local dayState = ReplicatedStorage:WaitForChild("DayState")
+local dayStats = ServerStorage:WaitForChild("DayStats")
 
 type Guest = {
 	model: Model,
@@ -74,6 +76,8 @@ local function spawnGuest()
 		return
 	end
 
+	dayStats:SetAttribute("Arrivals", (dayStats:GetAttribute("Arrivals") :: number) + 1)
+
 	local stand = pickShortestQueue()
 	if not stand then
 		-- §1: arrivals beyond the visible queue front are counters, not characters
@@ -86,7 +90,7 @@ local function spawnGuest()
 		return
 	end
 
-	local identity = GuestIdentity.generate(CURRENT_DAY)
+	local identity = GuestIdentity.generate(dayState:GetAttribute("Day") :: number)
 	local appearance = identity.appearance
 
 	local model = rigTemplate:Clone()
@@ -168,12 +172,34 @@ RunService.Heartbeat:Connect(function(deltaTime)
 	end
 end)
 
+-- §5: park drains at day end — despawn everyone once Summary starts
+local function drainPark()
+	for _, stand in stands do
+		table.clear(stand.queue)
+	end
+	for _, guest in guests do
+		guest.model:Destroy()
+	end
+	table.clear(guests)
+	overflowCount = 0
+	print("[GuestSpawner] park drained")
+end
+
+dayState:GetAttributeChangedSignal("Phase"):Connect(function()
+	if dayState:GetAttribute("Phase") == "Summary" then
+		drainPark()
+	end
+end)
+
 local arrivalsPerMinute = GameConfig.arrivalsPerMinute(GameConfig.Day1AttractionIndex)
 print(("[GuestSpawner] day-1 stream: %.1f arrivals/min"):format(arrivalsPerMinute))
 
 task.spawn(function()
 	while true do
 		task.wait(60 / arrivalsPerMinute)
-		spawnGuest()
+		-- §5: guests only arrive while the gates are open
+		if dayState:GetAttribute("Phase") == "Open" then
+			spawnGuest()
+		end
 	end
 end)

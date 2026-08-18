@@ -39,7 +39,6 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic F — Foundation (M0)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
-- **G-2** (M) Ticket inspection UI · code: `client/InspectionUI`, `server/GateService`, optimistic ack remote (request-id pattern) · assets: ticket card UI layout (placeholder styling fine) · ✔ decision feels instant; server logs authoritative result
 - **G-3** (S) Inspection juice · code: tween/sound hooks in InspectionUI · assets: stamp model + 2 stamp SFX, coin SFX, coin-fly particle · ✔ still satisfying after 20 stamps in a row
 - **G-4** (M) Queue patience · code: patience decay + walkaway in GuestSpawner/QueueService · assets: anger emote billboard icons (😐😠🤬) · ✔ an ignored queue visibly drains itself
 - **G-6** (M) Infected end-to-end · code: `server/anomalies/AnomalyBase` + `Infected` component (incubation, chase, convert, Fear AoE) · assets: pale/green skin params on guest rig, cough anim, zombie chase anim · ✔ a missed infected visibly cascades to 3+ zombies
@@ -94,7 +93,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-- **G-5** (M) Day cycle skeleton · code: `server/DayCycle` state machine, Summary UI v0 (income + admissions) · assets: none · ✔ Prep → Open (12 min) → Closing → Summary loops
+- **G-2** (M) Ticket inspection UI · code: `client/InspectionUI`, `server/GateService`, optimistic ack remote (request-id pattern) · assets: ticket card UI layout (placeholder styling fine) · ✔ decision feels instant; server logs authoritative result
 
 ---
 
@@ -106,7 +105,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **G-1** (M) Guest stream generator · code: `server/GuestSpawner`, `shared/GuestIdentity`, `shared/GameConfig` · assets: grey-box guest rig (`game/assets/GuestRig.model.json`, head 1.8 studs), gate + stand + spawn marker in park bootstrap · ✔ guests visibly queue at one stand · *needs Studio test: reopen `places/park.rbxl` (regenerated!), Play ~2 min — guests should spawn every ~13 s, glide to the stand queue, line up facing it; queue caps at 8 then logs abstract overflow*
+- **G-5** (M) Day cycle skeleton · code: `server/DayCycle` state machine, `client/DayHUD`, GuestSpawner phase gating · assets: none · ✔ Prep → Open (12 min) → Closing → Summary loops · *needs Studio test: set `workspace` attribute `DaySpeedMultiplier = 20` in command bar to compress the day; loop Prep → Open → Closing → Summary → Day 2 Prep; guests only arrive while Open, park drains at Summary*
 
 ---
 
@@ -114,6 +113,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 **🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
 
+- **G-1** (M) Guest stream generator · ✔ Studio-tested 2026-08-18: guests spawn at day-1 rate, queue at the stand, overflow counts abstractly (after CFrame-vs-Position asset fix)
 - **F-4** (M) Tagged-component system · ✔ Studio-tested 2026-08-18: TestRide logged attributes on spawn + detach on despawn
 - **F-3** (S) CI pipeline · ✔ verified 2026-08-18: green run on main; deliberately bad push got a red X (scratch branch, since deleted)
 - **F-2** (M) Toolchain skeleton · ✔ Studio-tested 2026-08-18: `rojo serve` synced into `park.rbxl`, server + client prints in Output

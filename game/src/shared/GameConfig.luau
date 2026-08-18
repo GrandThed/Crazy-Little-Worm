@@ -18,6 +18,13 @@ local GameConfig = {
 	QueueSpacing = 2.5, -- studs between queued guests
 	QueueStartOffset = 4, -- studs from stand front to first queue slot
 	GuestPivotHeight = 2.3, -- rig bounding-box center above ground, at scale 1
+
+	-- §5 day cycle: Prep (untimed) → Open → Closing → Summary (waits for continue)
+	OpenDurationSeconds = 12 * 60,
+	ClosingDurationSeconds = 2 * 60,
+
+	-- §8: fixed entry fee (charged on admission — wired up in G-8)
+	EntryFee = 10,
 }
 
 -- §2 inflow: arrivalsPerMinute = 2 + AttractionIdx / 50
