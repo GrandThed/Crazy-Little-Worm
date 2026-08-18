@@ -111,6 +111,11 @@ local function updateEmote(guest: Guest)
 	billboard.Enabled = guest.emoteLabel.Text ~= ""
 end
 
+local function hideEmote(guest: Guest)
+	guest.emoteLabel.Text = ""
+	(guest.emoteLabel.Parent :: BillboardGui).Enabled = false
+end
+
 local function removeGuest(guest: Guest)
 	local index = table.find(active, guest)
 	if index then
@@ -244,6 +249,7 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 	end
 	stand.counterGuest = nil
 
+	hideEmote(guest)
 	if verdict == "Approve" then
 		guest.state = "Admitted"
 		dayStats:SetAttribute("Admissions", (dayStats:GetAttribute("Admissions") :: number) + 1)
@@ -264,37 +270,64 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 end
 
 -- §3 walkaway: lost revenue now, satisfaction penalty when the index lands (P-5)
-local function walkAway(stand: Stand, queueIndex: number)
-	local guest = table.remove(stand.queue, queueIndex) :: Guest
+local function abandonVisit(guest: Guest)
 	guest.state = "WalkedAway"
 	guest.target = spawnPosition()
 	dayStats:SetAttribute("Walkaways", (dayStats:GetAttribute("Walkaways") :: number? or 0) + 1)
 	print(("[Guests] %s ran out of patience and left"):format(guest.model.Name))
+end
+
+local function walkAwayFromQueue(stand: Stand, queueIndex: number)
+	local guest = table.remove(stand.queue, queueIndex) :: Guest
+	abandonVisit(guest)
 	retargetQueue(stand)
 	materializeOverflow(stand)
 end
 
--- Debug hook (F-5): drop every queued guest to near-zero patience
+local function walkAwayFromCounter(stand: Stand)
+	local guest = stand.counterGuest :: Guest
+	stand.counterGuest = nil
+	abandonVisit(guest)
+	Guests.counterChanged:Fire(stand.part, nil)
+end
+
+-- Debug hook (F-5): drop everyone waiting (queue + counter) to near-zero patience
 function Guests.sapPatience()
 	for _, stand in stands do
 		for _, guest in stand.queue do
 			guest.patience = math.min(guest.patience, GameConfig.PatienceFuriousAt + 2)
 			updateEmote(guest)
 		end
+		local counterGuest = stand.counterGuest
+		if counterGuest then
+			counterGuest.patience =
+				math.min(counterGuest.patience, GameConfig.PatienceFuriousAt + 2)
+			updateEmote(counterGuest)
+		end
 	end
 end
 
--- Patience decay (§3): only guests waiting in line lose patience; the guest
--- being served at the counter doesn't
+-- Patience decay (§3): everyone still waiting loses patience — the queue AND
+-- the counter guest (an unmanned stand keeps nobody happy; it also soft-caps
+-- how long a player can dither over one ticket)
 task.spawn(function()
 	while true do
 		task.wait(1)
 		for _, stand in stands do
+			local counterGuest = stand.counterGuest
+			if counterGuest then
+				counterGuest.patience -= GameConfig.PatienceDecayPerSecond
+				if counterGuest.patience <= 0 then
+					walkAwayFromCounter(stand)
+				else
+					updateEmote(counterGuest)
+				end
+			end
 			for index = #stand.queue, 1, -1 do
 				local guest = stand.queue[index]
 				guest.patience -= GameConfig.PatienceDecayPerSecond
 				if guest.patience <= 0 then
-					walkAway(stand, index)
+					walkAwayFromQueue(stand, index)
 				else
 					updateEmote(guest)
 				end
