@@ -37,7 +37,6 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ## 📋 Backlog
 
 ### Epic F — Foundation (M0)
-- **F-3** (S) CI pipeline · code: GitHub Actions workflow (StyLua check + Selene) · assets: none · ✔ red X on a badly formatted push · ⛔ blocked: no GitHub remote yet (repo is local-only)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
 - **G-1** (M) Guest stream generator · code: `server/GuestSpawner`, `shared/GuestIdentity` (name/appearance/ticket gen) · assets: grey-box guest rig (chunky proportions, head ≥1.6 studs — art-direction constraint), gate + 1 stand blockout `.rbxm` · ✔ guests visibly queue at one stand
@@ -103,7 +102,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-*(empty — pull from Ready)*
+- **F-3** (S) CI pipeline · code: GitHub Actions workflow (StyLua check + Selene) · assets: none · ✔ red X on a badly formatted push
 
 ---
 
