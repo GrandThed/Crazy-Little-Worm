@@ -15,6 +15,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
+local EconomyStore = require(script.Parent.EconomyStore)
+
 local ACTION_NAMES =
 	{ "AdvancePhase", "SpawnGuest", "DrainPark", "ApproveFront", "DenyFront", "SapPatience" }
 
@@ -44,6 +46,11 @@ debugCommand.OnServerEvent:Connect(function(player, command: unknown, value: unk
 			print(
 				("[Debug] %s set day speed ×%d (applies at next phase)"):format(player.Name, value)
 			)
+		end
+	elseif command == "GiveCash" then
+		if typeof(value) == "number" and value >= 1 and value <= 100000 then
+			EconomyStore.add(value)
+			print(("[Debug] %s added $%d"):format(player.Name, value))
 		end
 	elseif typeof(command) == "string" and actions[command] then
 		print(("[Debug] %s → %s"):format(player.Name, command))

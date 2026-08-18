@@ -14,6 +14,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Component = require(ReplicatedStorage.Shared.Component)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local GuestIdentity = require(ReplicatedStorage.Shared.GuestIdentity)
+local EconomyStore = require(script.Parent.EconomyStore)
 
 local rigTemplate = ServerStorage:WaitForChild("Assets"):WaitForChild("GuestRig") :: Model
 local dayStats = ServerStorage:WaitForChild("DayStats")
@@ -257,6 +258,7 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 			"Income",
 			(dayStats:GetAttribute("Income") :: number) + GameConfig.EntryFee
 		)
+		EconomyStore.add(GameConfig.EntryFee)
 		-- v0 wander: glide to a random spot inside the park and linger;
 		-- replaced by the needs AI in P-1
 		guest.target = Vector3.new(rng:NextNumber(-25, 25), 0, rng:NextNumber(-30, 20))

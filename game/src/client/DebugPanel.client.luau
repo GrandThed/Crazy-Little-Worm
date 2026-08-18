@@ -13,6 +13,7 @@ end
 
 local dayState = ReplicatedStorage:WaitForChild("DayState")
 local debugState = ReplicatedStorage:WaitForChild("DebugState")
+local economyState = ReplicatedStorage:WaitForChild("EconomyState")
 local debugCommand =
 	ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DebugCommand") :: RemoteEvent
 
@@ -121,6 +122,10 @@ makeButton("Sap patience 😠", function()
 	debugCommand:FireServer("SapPatience")
 end)
 
+makeButton("Give $500", function()
+	debugCommand:FireServer("GiveCash", 500)
+end)
+
 task.spawn(function()
 	while true do
 		local lines = {
@@ -133,6 +138,7 @@ task.spawn(function()
 			("walkout %s"):format(tostring(debugState:GetAttribute("Walkaways") or 0)),
 			("admits  %s"):format(tostring(debugState:GetAttribute("Admissions") or 0)),
 			("income  $%s"):format(tostring(debugState:GetAttribute("Income") or 0)),
+			("cash    $%s"):format(tostring(economyState:GetAttribute("Cash") or 0)),
 		}
 		statsLabel.Text = table.concat(lines, "\n")
 		task.wait(0.25)

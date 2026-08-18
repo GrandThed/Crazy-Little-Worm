@@ -31,8 +31,9 @@ local GameConfig = {
 	OpenDurationSeconds = 12 * 60,
 	ClosingDurationSeconds = 2 * 60,
 
-	-- §8: fixed entry fee (charged on admission — wired up in G-8)
+	-- §8: fixed entry fee (charged on admission) and day-1 kit cash
 	EntryFee = 10,
+	StartingCash = 500,
 }
 
 -- §2 inflow: arrivalsPerMinute = 2 + AttractionIdx / 50
