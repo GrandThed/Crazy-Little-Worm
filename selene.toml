@@ -1,0 +1,5 @@
+std = "roblox"
+
+[lints]
+# Shadowing is a common, harmless Luau idiom (e.g. re-binding after type narrowing)
+shadowing = "allow"

@@ -104,19 +104,19 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-- **F-1** (S) Git init + `.gitignore` (Roblox/Rojo patterns + `*.blend1` Blender backups) + first commit of docs · code: none · assets: none · ✔ `git log` shows docs committed
-- **F-2** (M) Toolchain skeleton · code: Rokit manifest (rojo, wally, stylua, selene, luau-lsp), `default.project.json`, `src/server|client|shared` hello-world prints, StyLua/Selene configs · assets: empty park place file · ✔ `rojo serve` syncs into the park place and prints from all three contexts
+*(empty — pull from Ready)*
 
 ---
 
 ## 👀 Review
 
-*(empty)*
+- **F-2** (M) Toolchain skeleton · code: Rokit manifest (rojo, wally, stylua, selene, luau-lsp), `default.project.json`, `src/server|client|shared` hello-world prints, StyLua/Selene configs · assets: empty park place file · ✔ `rojo serve` syncs into the park place and prints from all three contexts · *needs Studio test: open `places/park.rbxl`, `rojo serve game/default.project.json`, connect plugin, hit Play — expect server + client + shared prints in Output*
 
 ---
 
 ## ✅ Done
 
+- **F-1** (S) Git init + `.gitignore` + first commit of docs · ✔ `git log` shows docs committed
 - **D-1** Game design doc: three systems, formulas, 5 anomalies, day cycle, catalog, engagement loops (docs/game-design.md)
 - **D-2** Server architecture: pure DataStore/MemoryStore, rooms flow, optimistic networking (server-architecture skill)
 - **D-3** Art direction locked (docs/art-direction.md)
