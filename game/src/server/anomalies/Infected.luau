@@ -241,4 +241,84 @@ function Infected.spawnOne()
 	Guests.spawnArrival({ anomaly = "Infected" })
 end
 
+-- §4 counter-item: evaporation puff, instant comedic resolution
+local function puffAt(position: Vector3)
+	local anchor = Instance.new("Part")
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.Transparency = 1
+	anchor.Size = Vector3.new(1, 1, 1)
+	anchor.CFrame = CFrame.new(position + Vector3.new(0, 2, 0))
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Color = ColorSequence.new(Color3.fromRGB(220, 245, 210))
+	emitter.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1.2),
+		NumberSequenceKeypoint.new(1, 3),
+	})
+	emitter.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	emitter.Lifetime = NumberRange.new(0.5, 0.9)
+	emitter.Speed = NumberRange.new(3, 6)
+	emitter.SpreadAngle = Vector2.new(180, 180)
+	emitter.Enabled = false
+	emitter.Parent = anchor
+	anchor.Parent = workspace
+	emitter:Emit(30)
+	task.delay(1.5, function()
+		anchor:Destroy()
+	end)
+end
+
+-- Net swing resolution (G-7). Nearest zombie evaporates in a puff; a tagged
+-- (Converting) guest is cured — thumbs-up, carries on as if nothing happened
+-- (tone rule). Returns what was hit for feedback: "zombie" | "cured" | nil.
+function Infected.netHit(position: Vector3): string?
+	local bestId: string? = nil
+	local bestCase: Case? = nil
+	local bestDistance = GameConfig.NetRange
+	for id, case in cases do
+		if case.stage == "Zombie" or case.stage == "Converting" then
+			if guestStillActive(case.guest) then
+				local distance = (guestPosition(case.guest) - position).Magnitude
+				if distance <= bestDistance then
+					bestId = id
+					bestCase = case
+					bestDistance = distance
+				end
+			end
+		end
+	end
+	if not (bestId and bestCase) then
+		return nil
+	end
+
+	local guest = bestCase.guest
+	cases[bestId] = nil
+	AnomalyBase.clear(bestId)
+
+	if bestCase.stage == "Zombie" then
+		puffAt(guestPosition(guest))
+		Guests.despawn(guest)
+		dayStats:SetAttribute("Captured", (dayStats:GetAttribute("Captured") :: number? or 0) + 1)
+		print(("[Anomaly] %s was netted and evaporated in a puff"):format(guest.model.Name))
+		return "zombie"
+	end
+
+	-- Cured mid-conversion: thumbs-up and resume the day (§4 tone rule)
+	guest.state = "Admitted"
+	guest.emoteLabel.Text = "👍"
+	(guest.emoteLabel.Parent :: BillboardGui).Enabled = true
+	task.delay(1.5, function()
+		if guest.emoteLabel.Parent then
+			guest.emoteLabel.Text = ""
+			(guest.emoteLabel.Parent :: BillboardGui).Enabled = false
+		end
+	end)
+	guest.target = randomParkPoint()
+	print(("[Anomaly] %s was cured by the net — thumbs up"):format(guest.model.Name))
+	return "cured"
+end
+
 return Infected

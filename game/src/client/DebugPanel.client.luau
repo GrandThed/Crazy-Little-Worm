@@ -141,6 +141,7 @@ task.spawn(function()
 			("arrived %s"):format(tostring(debugState:GetAttribute("Arrivals") or 0)),
 			("walkout %s"):format(tostring(debugState:GetAttribute("Walkaways") or 0)),
 			("zombies %s"):format(tostring(debugState:GetAttribute("Zombies") or 0)),
+			("netted  %s"):format(tostring(debugState:GetAttribute("Captured") or 0)),
 			("admits  %s"):format(tostring(debugState:GetAttribute("Admissions") or 0)),
 			("income  $%s"):format(tostring(debugState:GetAttribute("Income") or 0)),
 			("cash    $%s"):format(tostring(economyState:GetAttribute("Cash") or 0)),

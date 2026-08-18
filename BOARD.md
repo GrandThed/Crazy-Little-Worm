@@ -41,7 +41,6 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic F — Foundation (M0)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
-- **G-7** (S) Capture net + tool rack · code: `shared/ToolRack`, net tool component · assets: net + wall-rack grey-box, evaporation puff particle, thumbs-up emote · ✔ solo player contains a 3-zombie outbreak
 - **G-9** (M) **Fun-check playtest** · code: none · assets: none · ✔ 3 full solo days played; go/no-go findings written into docs/game-design.md
 
 ### Epic P — Park sim (M2) — spec: §1, §2, §5, §6, §9
@@ -103,7 +102,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **G-6** (M) Infected end-to-end · code: `server/anomalies/AnomalyBase` + `Infected`, `AnomalyService` (day-2 spawn roll, A-1 stand-in) · assets: pale/green head tint, cough billboard, stained-ticket card overlay, zombie color/speed (all grey-box) · ✔ a missed infected visibly cascades to 3+ zombies · *needs Studio test: approve ~5 guests, press "Spawn infected 🧟" — pale-headed cougher with stained ticket arrives; approve them, speed ×20 → turns in ~5 s real, chases, tags, zombies count climbs to 3+; Fear AoE deferred to P-1*
+- **G-7** (S) Capture net + tool rack · code: `server/ToolRackService`, `Infected.netHit` · assets: net + wall-rack grey-box, evaporation puff particle, thumbs-up emote · ✔ solo player contains a 3-zombie outbreak · *needs Studio test: take net from rack by the gate (prompt), spawn infected + approve, let it cascade to 3 zombies, then swing (click) near each — zombies puff away, tagged guests cure with a 👍; `netted` counter climbs*
 
 ---
 
@@ -111,6 +110,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 **🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
 
+- **G-6** (M) Infected end-to-end · ✔ Studio-tested 2026-08-18: tells at gate, incubation, chase + tag cascade past 3 zombies
 - **G-8** (S) Economy v0 · ✔ Studio-tested 2026-08-18: $500 start, +$10 per approve, deny pays nothing
 - **G-3** (S) Inspection juice · ✔ Studio-tested 2026-08-18: stamp/slide/SFX/coin-fly loop feels good at speed
 - **G-4** (M) Queue patience · ✔ Studio-tested 2026-08-18: queue + counter decay, emotes at thresholds, walkaways drain an unmanned stand (after counter-guest fix)

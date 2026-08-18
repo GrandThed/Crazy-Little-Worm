@@ -46,6 +46,10 @@ local GameConfig = {
 	-- §8: day 1 is the only guaranteed-safe day; slots fill with p≈0.7
 	AnomalyFillChance = 0.7,
 
+	-- §4 counter-item: capture net (G-7)
+	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
+	NetCooldownSeconds = 1,
+
 	-- Grey-box park interior where admitted guests wander/flee (studs)
 	ParkBounds = { minX = -30, maxX = 30, minZ = -35, maxZ = 25 },
 }

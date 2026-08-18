@@ -162,6 +162,11 @@ local function removeGuest(guest: Guest)
 	dayStats:SetAttribute("GuestsOnMap", #active)
 end
 
+-- External removal (anomaly capture etc.)
+function Guests.despawn(guest: Guest)
+	removeGuest(guest)
+end
+
 local function retargetQueue(stand: Stand)
 	for index, guest in stand.queue do
 		guest.target = queueSlot(stand, index)

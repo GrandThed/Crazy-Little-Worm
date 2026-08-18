@@ -151,6 +151,24 @@
 					]
 				}
 			},
+			"ToolRack1": {
+				"$className": "Part",
+				"$properties": {
+					"Anchored": true,
+					"Size": [4, 3, 0.6],
+					"CFrame": [8, 1.5, -52, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+					"Color": [0.55, 0.38, 0.22],
+					"Material": "SmoothPlastic",
+					"TopSurface": "Smooth",
+					"BottomSurface": "Smooth",
+					"Tags": ["ToolRack"],
+					"Attributes": {
+						"Attributes": {
+							"Tool": { "String": "CaptureNet" }
+						}
+					}
+				}
+			},
 			"GuestSpawn": {
 				"$className": "Part",
 				"$properties": {

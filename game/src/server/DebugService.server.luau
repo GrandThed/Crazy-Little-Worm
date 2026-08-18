@@ -82,6 +82,7 @@ if RunService:IsStudio() then
 					"Overflow",
 					"Walkaways",
 					"Zombies",
+					"Captured",
 				}
 			do
 				debugState:SetAttribute(attribute, dayStats:GetAttribute(attribute) or 0)
