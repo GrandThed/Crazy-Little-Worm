@@ -41,7 +41,6 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic F — Foundation (M0)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
-- **G-6** (M) Infected end-to-end · code: `server/anomalies/AnomalyBase` + `Infected` component (incubation, chase, convert, Fear AoE) · assets: pale/green skin params on guest rig, cough anim, zombie chase anim · ✔ a missed infected visibly cascades to 3+ zombies
 - **G-7** (S) Capture net + tool rack · code: `shared/ToolRack`, net tool component · assets: net + wall-rack grey-box, evaporation puff particle, thumbs-up emote · ✔ solo player contains a 3-zombie outbreak
 - **G-9** (M) **Fun-check playtest** · code: none · assets: none · ✔ 3 full solo days played; go/no-go findings written into docs/game-design.md
 
@@ -104,8 +103,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **G-8** (S) Economy v0 · code: `server/EconomyStore` (add/trySpend, replicated Cash), `client/CashHUD` · assets: none · ✔ day income = admissions × fee; deny pays nothing · *test: cash starts $500, +$10 per approve, nothing on deny; debug "Give $500" works*
-- **G-3** (S) Inspection juice · code: stamp overlay + card slide tweens, pitched SFX, coin fly in InspectionUI · assets: grey-box (built-in sounds, UI stamp — final stamp model/SFX later) · ✔ still satisfying after 20 stamps in a row · *test: stamp 20 guests fast — feel check is the acceptance*
+- **G-6** (M) Infected end-to-end · code: `server/anomalies/AnomalyBase` + `Infected`, `AnomalyService` (day-2 spawn roll, A-1 stand-in) · assets: pale/green head tint, cough billboard, stained-ticket card overlay, zombie color/speed (all grey-box) · ✔ a missed infected visibly cascades to 3+ zombies · *needs Studio test: approve ~5 guests, press "Spawn infected 🧟" — pale-headed cougher with stained ticket arrives; approve them, speed ×20 → turns in ~5 s real, chases, tags, zombies count climbs to 3+; Fear AoE deferred to P-1*
 
 ---
 
@@ -113,6 +111,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 **🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
 
+- **G-8** (S) Economy v0 · ✔ Studio-tested 2026-08-18: $500 start, +$10 per approve, deny pays nothing
+- **G-3** (S) Inspection juice · ✔ Studio-tested 2026-08-18: stamp/slide/SFX/coin-fly loop feels good at speed
 - **G-4** (M) Queue patience · ✔ Studio-tested 2026-08-18: queue + counter decay, emotes at thresholds, walkaways drain an unmanned stand (after counter-guest fix)
 - **G-2** (M) Ticket inspection UI · ✔ Studio-tested 2026-08-18: instant optimistic decisions, authoritative server log, close-button fix verified; 2-player check deferred to next co-op session
 - **F-5** (M) Debug panel · ✔ Studio-tested 2026-08-18: speed/skip/spawn/drain + live stats all working from the panel

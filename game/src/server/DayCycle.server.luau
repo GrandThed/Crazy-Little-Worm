@@ -29,6 +29,7 @@ dayStats:SetAttribute("Arrivals", 0)
 dayStats:SetAttribute("Admissions", 0)
 dayStats:SetAttribute("Income", 0)
 dayStats:SetAttribute("Walkaways", 0)
+dayStats:SetAttribute("Zombies", 0)
 dayStats.Parent = ServerStorage
 
 local remotes = Instance.new("Folder")
@@ -98,6 +99,7 @@ local function resetStats()
 	dayStats:SetAttribute("Admissions", 0)
 	dayStats:SetAttribute("Income", 0)
 	dayStats:SetAttribute("Walkaways", 0)
+	dayStats:SetAttribute("Zombies", 0)
 end
 
 openGatesRemote.OnServerEvent:Connect(function()

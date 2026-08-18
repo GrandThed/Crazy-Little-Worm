@@ -17,8 +17,15 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local EconomyStore = require(script.Parent.EconomyStore)
 
-local ACTION_NAMES =
-	{ "AdvancePhase", "SpawnGuest", "DrainPark", "ApproveFront", "DenyFront", "SapPatience" }
+local ACTION_NAMES = {
+	"AdvancePhase",
+	"SpawnGuest",
+	"DrainPark",
+	"ApproveFront",
+	"DenyFront",
+	"SapPatience",
+	"SpawnInfected",
+}
 
 local debugActions = Instance.new("Folder")
 debugActions.Name = "DebugActions"
@@ -67,7 +74,15 @@ if RunService:IsStudio() then
 	task.spawn(function()
 		while true do
 			for _, attribute in
-				{ "Arrivals", "Admissions", "Income", "GuestsOnMap", "Overflow", "Walkaways" }
+				{
+					"Arrivals",
+					"Admissions",
+					"Income",
+					"GuestsOnMap",
+					"Overflow",
+					"Walkaways",
+					"Zombies",
+				}
 			do
 				debugState:SetAttribute(attribute, dayStats:GetAttribute(attribute) or 0)
 			end

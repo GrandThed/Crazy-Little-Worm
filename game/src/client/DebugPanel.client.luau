@@ -126,6 +126,10 @@ makeButton("Give $500", function()
 	debugCommand:FireServer("GiveCash", 500)
 end)
 
+makeButton("Spawn infected 🧟", function()
+	debugCommand:FireServer("SpawnInfected")
+end)
+
 task.spawn(function()
 	while true do
 		local lines = {
@@ -136,6 +140,7 @@ task.spawn(function()
 			("queue+  %s"):format(tostring(debugState:GetAttribute("Overflow") or 0)),
 			("arrived %s"):format(tostring(debugState:GetAttribute("Arrivals") or 0)),
 			("walkout %s"):format(tostring(debugState:GetAttribute("Walkaways") or 0)),
+			("zombies %s"):format(tostring(debugState:GetAttribute("Zombies") or 0)),
 			("admits  %s"):format(tostring(debugState:GetAttribute("Admissions") or 0)),
 			("income  $%s"):format(tostring(debugState:GetAttribute("Income") or 0)),
 			("cash    $%s"):format(tostring(economyState:GetAttribute("Cash") or 0)),

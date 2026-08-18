@@ -89,6 +89,35 @@ body.TextYAlignment = Enum.TextYAlignment.Top
 body.Text = ""
 body.Parent = card
 
+-- §4 Infected ticket tell: grubby smudges on the card (cosmetic, driven by
+-- the replicated TicketStained attribute)
+local stains = Instance.new("Frame")
+stains.Name = "Stains"
+stains.BackgroundTransparency = 1
+stains.Size = UDim2.fromScale(1, 1)
+stains.Visible = false
+stains.ZIndex = 2
+stains.Parent = card
+for _, blotch in
+	{
+		{ x = 0.68, y = 0.34, size = 30 },
+		{ x = 0.52, y = 0.58, size = 20 },
+		{ x = 0.78, y = 0.55, size = 24 },
+	}
+do
+	local spot = Instance.new("Frame")
+	spot.AnchorPoint = Vector2.new(0.5, 0.5)
+	spot.Position = UDim2.fromScale(blotch.x, blotch.y)
+	spot.Size = UDim2.fromOffset(blotch.size, blotch.size)
+	spot.BackgroundColor3 = Color3.fromRGB(96, 82, 52)
+	spot.BackgroundTransparency = 0.55
+	spot.ZIndex = 2
+	spot.Parent = stains
+	local spotCorner = Instance.new("UICorner")
+	spotCorner.CornerRadius = UDim.new(1, 0)
+	spotCorner.Parent = spot
+end
+
 local closeButton = Instance.new("TextButton")
 closeButton.AnchorPoint = Vector2.new(1, 0)
 closeButton.Position = UDim2.new(1, -4, 0, 4)
@@ -224,8 +253,10 @@ local function renderGuest(guestModel: Model?)
 		body.Text = "\n   waiting for the\n   next guest…"
 		approveButton.Visible = false
 		denyButton.Visible = false
+		stains.Visible = false
 		return
 	end
+	stains.Visible = guestModel:GetAttribute("TicketStained") == true
 	body.Text = ("NAME    %s\nSERIAL  %s\nTYPE    %s\nDATE    %s"):format(
 		tostring(guestModel:GetAttribute("TicketName")),
 		tostring(guestModel:GetAttribute("TicketSerial")),

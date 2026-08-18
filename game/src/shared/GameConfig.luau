@@ -36,6 +36,18 @@ local GameConfig = {
 	-- §8: fixed entry fee (charged on admission) and day-1 kit cash
 	EntryFee = 10,
 	StartingCash = 500,
+
+	-- §4 Infected: incubates after admission, zombie tag-converts on contact
+	InfectedIncubationSeconds = 90,
+	InfectedConversionSeconds = 20,
+	ZombieSpeedMultiplier = 1.3, -- zombies outrun guests so the cascade lands
+	ZombieTagRadius = 2.2, -- studs; contact distance for a conversion tag
+	ZombieScareRadius = 9, -- studs; admitted guests flee zombies inside this
+	-- §8: day 1 is the only guaranteed-safe day; slots fill with p≈0.7
+	AnomalyFillChance = 0.7,
+
+	-- Grey-box park interior where admitted guests wander/flee (studs)
+	ParkBounds = { minX = -30, maxX = 30, minZ = -35, maxZ = 25 },
 }
 
 -- §2 inflow: arrivalsPerMinute = 2 + AttractionIdx / 50

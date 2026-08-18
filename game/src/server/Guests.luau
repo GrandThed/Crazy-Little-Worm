@@ -21,7 +21,14 @@ local dayStats = ServerStorage:WaitForChild("DayStats")
 local rng = Random.new()
 
 export type Verdict = "Approve" | "Deny"
-export type GuestState = "Queueing" | "AtCounter" | "Admitted" | "Denied" | "WalkedAway"
+export type GuestState =
+	"Queueing"
+	| "AtCounter"
+	| "Admitted"
+	| "Denied"
+	| "WalkedAway"
+	| "Converting" -- §4: tagged by a zombie, timer running (Infected owns the timer)
+	| "Zombie"
 
 export type Guest = {
 	id: string,
@@ -33,6 +40,12 @@ export type Guest = {
 	facing: Vector3,
 	patience: number, -- §3: decays while Queueing; 0 = walkaway
 	emoteLabel: TextLabel,
+	speed: number, -- studs/s; zombies run faster than guests
+}
+
+export type SpawnOptions = {
+	countArrival: boolean?, -- false when materializing an already-counted overflow
+	anomaly: string?, -- registered marker name; truth stays server-only
 }
 
 type Stand = {
@@ -50,6 +63,29 @@ Guests.counterChanged = Instance.new("BindableEvent")
 local stands: { [BasePart]: Stand } = {}
 local active: { Guest } = {}
 local overflowCount = 0
+
+-- Extension points for the anomaly layer (plain callbacks — BindableEvents
+-- would deep-copy the guest table and break identity)
+local anomalyMarkers: { [string]: (Guest) -> () } = {}
+local admittedCallbacks: { (Guest) -> () } = {}
+local drainedCallbacks: { () -> () } = {}
+
+function Guests.registerAnomalyMarker(name: string, marker: (Guest) -> ())
+	anomalyMarkers[name] = marker
+end
+
+function Guests.onAdmitted(callback: (Guest) -> ())
+	table.insert(admittedCallbacks, callback)
+end
+
+function Guests.onDrained(callback: () -> ())
+	table.insert(drainedCallbacks, callback)
+end
+
+-- Live list — callers iterate, never mutate
+function Guests.getActive(): { Guest }
+	return active
+end
 
 local function getPart(model: Model, name: string): BasePart
 	local child = model:FindFirstChild(name)
@@ -139,7 +175,7 @@ local function materializeOverflow(stand: Stand)
 	end
 	overflowCount -= 1
 	dayStats:SetAttribute("Overflow", overflowCount)
-	Guests.spawnArrival(false)
+	Guests.spawnArrival({ countArrival = false })
 end
 
 function Guests.getStands(): { Stand }
@@ -154,12 +190,12 @@ function Guests.hasStands(): boolean
 	return next(stands) ~= nil
 end
 
--- countArrival=false is used when materializing overflow (already counted)
-function Guests.spawnArrival(countArrival: boolean?)
+function Guests.spawnArrival(options: SpawnOptions?)
+	local opts: SpawnOptions = options or {}
 	if not Guests.hasStands() then
 		return
 	end
-	if countArrival ~= false then
+	if opts.countArrival ~= false then
 		dayStats:SetAttribute("Arrivals", (dayStats:GetAttribute("Arrivals") :: number) + 1)
 	end
 
@@ -208,9 +244,19 @@ function Guests.spawnArrival(countArrival: boolean?)
 		facing = -stand.part.CFrame.LookVector,
 		patience = GameConfig.PatienceMax,
 		emoteLabel = makeEmoteBillboard(getPart(model, "Head")),
+		speed = GameConfig.GuestWalkSpeed,
 	}
 	table.insert(stand.queue, guest)
 	guest.target = queueSlot(stand, #stand.queue)
+
+	if opts.anomaly then
+		local marker = anomalyMarkers[opts.anomaly]
+		if marker then
+			marker(guest)
+		else
+			warn(("[Guests] no anomaly marker registered for %q"):format(opts.anomaly))
+		end
+	end
 
 	local origin = spawnPosition() + Vector3.new(0, guest.pivotHeight, 0)
 	model:PivotTo(CFrame.new(origin))
@@ -261,7 +307,15 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 		EconomyStore.add(GameConfig.EntryFee)
 		-- v0 wander: glide to a random spot inside the park and linger;
 		-- replaced by the needs AI in P-1
-		guest.target = Vector3.new(rng:NextNumber(-25, 25), 0, rng:NextNumber(-30, 20))
+		local bounds = GameConfig.ParkBounds
+		guest.target = Vector3.new(
+			rng:NextNumber(bounds.minX, bounds.maxX),
+			0,
+			rng:NextNumber(bounds.minZ, bounds.maxZ)
+		)
+		for _, callback in admittedCallbacks do
+			callback(guest)
+		end
 	else
 		guest.state = "Denied"
 		guest.target = spawnPosition()
@@ -353,6 +407,9 @@ function Guests.drainPark()
 	overflowCount = 0
 	dayStats:SetAttribute("GuestsOnMap", 0)
 	dayStats:SetAttribute("Overflow", 0)
+	for _, callback in drainedCallbacks do
+		callback()
+	end
 	print("[Guests] park drained")
 end
 
@@ -414,7 +471,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 				end)
 			end
 		else
-			local step = math.min(GameConfig.GuestWalkSpeed * deltaTime, delta.Magnitude)
+			local step = math.min(guest.speed * deltaTime, delta.Magnitude)
 			local nextPosition = flat + delta.Unit * step + lift
 			guest.model:PivotTo(CFrame.lookAt(nextPosition, nextPosition + delta.Unit))
 		end
