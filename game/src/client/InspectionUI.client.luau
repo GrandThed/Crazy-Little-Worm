@@ -11,6 +11,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local decideRemote = remotes:WaitForChild("Decide") :: RemoteEvent
@@ -47,7 +48,7 @@ header.Size = UDim2.new(1, 0, 0, 34)
 header.TextColor3 = Color3.fromRGB(255, 255, 255)
 header.Font = Enum.Font.GothamBold
 header.TextSize = 16
-header.Text = "🎟 PARK TICKET"
+header.Text = "PARK TICKET"
 header.Parent = card
 local headerCorner = Instance.new("UICorner")
 headerCorner.CornerRadius = UDim.new(0, 10)
@@ -70,12 +71,16 @@ local closeButton = Instance.new("TextButton")
 closeButton.AnchorPoint = Vector2.new(1, 0)
 closeButton.Position = UDim2.new(1, -4, 0, 4)
 closeButton.Size = UDim2.fromOffset(26, 26)
-closeButton.BackgroundTransparency = 1
+closeButton.BackgroundColor3 = Color3.fromRGB(139, 45, 40)
 closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeButton.Font = Enum.Font.GothamBold
 closeButton.TextSize = 16
-closeButton.Text = "✕"
+closeButton.Text = "X"
+closeButton.ZIndex = 3
 closeButton.Parent = card
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(1, 0)
+closeCorner.Parent = closeButton
 
 local function makeVerdictButton(text: string, color: Color3, xScale: number): TextButton
 	local button = Instance.new("TextButton")
@@ -154,6 +159,13 @@ closeButton.Activated:Connect(function()
 	setFocusedStand(nil)
 end)
 
+-- Escape is reserved by the core menu, so X is the keyboard close
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and input.KeyCode == Enum.KeyCode.X and focusedStand then
+		setFocusedStand(nil)
+	end
+end)
+
 decideAckRemote.OnClientEvent:Connect(function(ack: { requestId: string, accepted: boolean })
 	if not pendingRequests[ack.requestId] then
 		return
@@ -161,9 +173,9 @@ decideAckRemote.OnClientEvent:Connect(function(ack: { requestId: string, accepte
 	pendingRequests[ack.requestId] = nil
 	if not ack.accepted then
 		-- Rollback: flash and resync to whatever the server says is at the counter
-		header.Text = "⚠ OUT OF SYNC — RETRY"
+		header.Text = "OUT OF SYNC — RETRY"
 		task.delay(0.8, function()
-			header.Text = "🎟 PARK TICKET"
+			header.Text = "PARK TICKET"
 		end)
 		refreshFromServerTruth()
 	end
