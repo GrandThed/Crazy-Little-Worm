@@ -315,10 +315,12 @@ end
 task.spawn(function()
 	while true do
 		task.wait(1)
+		-- decay in simulated seconds so the debug time scale compresses waits too
+		local decay = GameConfig.PatienceDecayPerSecond * GameConfig.timeScale()
 		for _, stand in stands do
 			local counterGuest = stand.counterGuest
 			if counterGuest then
-				counterGuest.patience -= GameConfig.PatienceDecayPerSecond
+				counterGuest.patience -= decay
 				if counterGuest.patience <= 0 then
 					walkAwayFromCounter(stand)
 				else
@@ -327,7 +329,7 @@ task.spawn(function()
 			end
 			for index = #stand.queue, 1, -1 do
 				local guest = stand.queue[index]
-				guest.patience -= GameConfig.PatienceDecayPerSecond
+				guest.patience -= decay
 				if guest.patience <= 0 then
 					walkAwayFromQueue(stand, index)
 				else
@@ -405,7 +407,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			if guest.state == "Denied" or guest.state == "WalkedAway" then
 				removeGuest(guest)
 			elseif guest.state == "Admitted" then
-				task.delay(rng:NextNumber(15, 30), function()
+				task.delay(rng:NextNumber(15, 30) / GameConfig.timeScale(), function()
 					if table.find(active, guest) and guest.state == "Admitted" then
 						removeGuest(guest)
 					end

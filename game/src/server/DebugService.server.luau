@@ -43,9 +43,7 @@ debugCommand.OnServerEvent:Connect(function(player, command: unknown, value: unk
 	if command == "SetDaySpeed" then
 		if typeof(value) == "number" and value >= 1 and value <= 100 then
 			workspace:SetAttribute("DaySpeedMultiplier", value)
-			print(
-				("[Debug] %s set day speed ×%d (applies at next phase)"):format(player.Name, value)
-			)
+			print(("[Debug] %s set day speed ×%d"):format(player.Name, value))
 		end
 	elseif command == "GiveCash" then
 		if typeof(value) == "number" and value >= 1 and value <= 100000 then

@@ -2,6 +2,8 @@
 -- Tunable constants. Numbers come from docs/game-design.md — section noted per value.
 -- Change knobs here, never inline in feature code.
 
+local RunService = game:GetService("RunService")
+
 local GameConfig = {
 	-- §2 / §8: day-1 seed values (real AttractionIndex calc lands in P-5)
 	Day1AttractionIndex = 130,
@@ -39,6 +41,17 @@ local GameConfig = {
 -- §2 inflow: arrivalsPerMinute = 2 + AttractionIdx / 50
 function GameConfig.arrivalsPerMinute(attractionIndex: number): number
 	return 2 + attractionIndex / 50
+end
+
+-- Studio-only debug time scale (F-5 panel): compresses simulation time —
+-- phase durations, arrival rate, patience decay. Always 1 in production.
+-- Visual glide speed is intentionally NOT scaled.
+function GameConfig.timeScale(): number
+	if not RunService:IsStudio() then
+		return 1
+	end
+	local multiplier = workspace:GetAttribute("DaySpeedMultiplier")
+	return if typeof(multiplier) == "number" and multiplier > 0 then multiplier else 1
 end
 
 return GameConfig

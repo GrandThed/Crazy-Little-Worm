@@ -32,12 +32,21 @@ end)
 local arrivalsPerMinute = GameConfig.arrivalsPerMinute(GameConfig.Day1AttractionIndex)
 print(("[GuestSpawner] day-1 stream: %.1f arrivals/min"):format(arrivalsPerMinute))
 
+-- Accumulate simulated time so the debug time scale speeds arrivals up
+-- immediately; §5: guests only arrive while the gates are open
 task.spawn(function()
+	local interval = 60 / arrivalsPerMinute
+	local accumulated = 0
 	while true do
-		task.wait(60 / arrivalsPerMinute)
-		-- §5: guests only arrive while the gates are open
+		local elapsed = task.wait(0.25)
 		if dayState:GetAttribute("Phase") == "Open" then
-			Guests.spawnArrival()
+			accumulated += elapsed * GameConfig.timeScale()
+			if accumulated >= interval then
+				accumulated -= interval
+				Guests.spawnArrival()
+			end
+		else
+			accumulated = 0
 		end
 	end
 end)

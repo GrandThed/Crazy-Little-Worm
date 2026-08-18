@@ -47,32 +47,45 @@ remotes.Parent = ReplicatedStorage
 local currentDay = 1
 local currentPhase = "Prep"
 local advanceRequested = false
+local phaseDeadline: number? = nil -- real-time deadline of the current timed phase
+local lastTimeScale = GameConfig.timeScale()
 
--- Studio-only fast-forward: set a DaySpeedMultiplier attribute on Workspace
--- (e.g. 20) in the command bar to compress the 12-minute day for testing
-local function scaled(seconds: number): number
-	local multiplier = workspace:GetAttribute("DaySpeedMultiplier")
-	if RunService:IsStudio() and typeof(multiplier) == "number" and multiplier > 0 then
-		return seconds / multiplier
-	end
-	return seconds
-end
-
-local function setPhase(phase: string, duration: number?)
+-- gameDuration is in design-time seconds; the debug time scale (F-5)
+-- compresses it to real time. duration nil = untimed phase.
+local function setPhase(phase: string, gameDuration: number?)
 	currentPhase = phase
+	phaseDeadline = if gameDuration
+		then workspace:GetServerTimeNow() + gameDuration / GameConfig.timeScale()
+		else nil
 	dayState:SetAttribute("Phase", phase)
-	dayState:SetAttribute(
-		"PhaseEndsAt",
-		if duration then workspace:GetServerTimeNow() + duration else 0
-	)
+	dayState:SetAttribute("PhaseEndsAt", phaseDeadline or 0)
 	print(("[DayCycle] day %d — %s"):format(currentDay, phase))
 end
 
--- Blocks until the phase deadline passes (nil = untimed) or something requests
--- an advance: the phase-appropriate player remote, or the debug skip (F-5)
-local function waitForAdvance(deadline: number?)
+-- Speed changes apply immediately: rescale the remaining time of the current
+-- phase so the countdown jumps to the new pace
+workspace:GetAttributeChangedSignal("DaySpeedMultiplier"):Connect(function()
+	if not RunService:IsStudio() then
+		return
+	end
+	local newScale = GameConfig.timeScale()
+	local deadline = phaseDeadline
+	if deadline then
+		local now = workspace:GetServerTimeNow()
+		local remaining = math.max(0, deadline - now)
+		phaseDeadline = now + remaining * lastTimeScale / newScale
+		dayState:SetAttribute("PhaseEndsAt", phaseDeadline)
+	end
+	lastTimeScale = newScale
+end)
+
+-- Blocks until the phase deadline passes (untimed phases have none) or
+-- something requests an advance: the phase-appropriate player remote, or the
+-- debug skip (F-5)
+local function waitForAdvance()
 	advanceRequested = false
 	while not advanceRequested do
+		local deadline = phaseDeadline
 		if deadline and workspace:GetServerTimeNow() >= deadline then
 			return
 		end
@@ -112,13 +125,11 @@ task.spawn(function()
 		setPhase("Prep")
 		waitForAdvance()
 
-		local openDuration = scaled(GameConfig.OpenDurationSeconds)
-		setPhase("Open", openDuration)
-		waitForAdvance(workspace:GetServerTimeNow() + openDuration)
+		setPhase("Open", GameConfig.OpenDurationSeconds)
+		waitForAdvance()
 
-		local closingDuration = scaled(GameConfig.ClosingDurationSeconds)
-		setPhase("Closing", closingDuration)
-		waitForAdvance(workspace:GetServerTimeNow() + closingDuration)
+		setPhase("Closing", GameConfig.ClosingDurationSeconds)
+		waitForAdvance()
 
 		setPhase("Summary")
 		daySummaryRemote:FireAllClients({
