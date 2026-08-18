@@ -3,6 +3,75 @@
 	"tree": {
 		"$className": "DataModel",
 		"Workspace": {
+			"Gate": {
+				"$className": "Model",
+				"PillarLeft": {
+					"$className": "Part",
+					"$properties": {
+						"Anchored": true,
+						"Size": [2, 12, 2],
+						"Position": [-8, 6, -60],
+						"Color": [0.88, 0.34, 0.31],
+						"Material": "SmoothPlastic",
+						"TopSurface": "Smooth",
+						"BottomSurface": "Smooth"
+					}
+				},
+				"PillarRight": {
+					"$className": "Part",
+					"$properties": {
+						"Anchored": true,
+						"Size": [2, 12, 2],
+						"Position": [8, 6, -60],
+						"Color": [0.88, 0.34, 0.31],
+						"Material": "SmoothPlastic",
+						"TopSurface": "Smooth",
+						"BottomSurface": "Smooth"
+					}
+				},
+				"Crossbar": {
+					"$className": "Part",
+					"$properties": {
+						"Anchored": true,
+						"Size": [18, 2, 2],
+						"Position": [0, 13, -60],
+						"Color": [0.97, 0.66, 0.13],
+						"Material": "SmoothPlastic",
+						"TopSurface": "Smooth",
+						"BottomSurface": "Smooth"
+					}
+				}
+			},
+			"EntryStand1": {
+				"$className": "Part",
+				"$properties": {
+					"Anchored": true,
+					"Size": [4, 3.5, 2],
+					"Position": [14, 1.75, -60],
+					"Color": [0.25, 0.55, 0.84],
+					"Material": "SmoothPlastic",
+					"TopSurface": "Smooth",
+					"BottomSurface": "Smooth",
+					"Tags": ["EntryStand"],
+					"Attributes": {
+						"Attributes": {
+							"StandId": { "Float64": 1 },
+							"QueueCapacity": { "Float64": 8 }
+						}
+					}
+				}
+			},
+			"GuestSpawn": {
+				"$className": "Part",
+				"$properties": {
+					"Anchored": true,
+					"CanCollide": false,
+					"Transparency": 1,
+					"Size": [4, 1, 4],
+					"Position": [14, 0.5, -90],
+					"Tags": ["GuestSpawn"]
+				}
+			},
 			"Baseplate": {
 				"$className": "Part",
 				"$properties": {
@@ -34,6 +103,11 @@
 		"ServerScriptService": {
 			"Server": {
 				"$path": "../game/src/server"
+			}
+		},
+		"ServerStorage": {
+			"Assets": {
+				"$path": "../game/assets"
 			}
 		},
 		"StarterPlayer": {

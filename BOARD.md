@@ -39,11 +39,9 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic F — Foundation (M0)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
-- **G-1** (M) Guest stream generator · code: `server/GuestSpawner`, `shared/GuestIdentity` (name/appearance/ticket gen) · assets: grey-box guest rig (chunky proportions, head ≥1.6 studs — art-direction constraint), gate + 1 stand blockout `.rbxm` · ✔ guests visibly queue at one stand
 - **G-2** (M) Ticket inspection UI · code: `client/InspectionUI`, `server/GateService`, optimistic ack remote (request-id pattern) · assets: ticket card UI layout (placeholder styling fine) · ✔ decision feels instant; server logs authoritative result
 - **G-3** (S) Inspection juice · code: tween/sound hooks in InspectionUI · assets: stamp model + 2 stamp SFX, coin SFX, coin-fly particle · ✔ still satisfying after 20 stamps in a row
 - **G-4** (M) Queue patience · code: patience decay + walkaway in GuestSpawner/QueueService · assets: anger emote billboard icons (😐😠🤬) · ✔ an ignored queue visibly drains itself
-- **G-5** (M) Day cycle skeleton · code: `server/DayCycle` state machine, Summary UI v0 (income + admissions) · assets: none · ✔ Prep → Open (12 min) → Closing → Summary loops
 - **G-6** (M) Infected end-to-end · code: `server/anomalies/AnomalyBase` + `Infected` component (incubation, chase, convert, Fear AoE) · assets: pale/green skin params on guest rig, cough anim, zombie chase anim · ✔ a missed infected visibly cascades to 3+ zombies
 - **G-7** (S) Capture net + tool rack · code: `shared/ToolRack`, net tool component · assets: net + wall-rack grey-box, evaporation puff particle, thumbs-up emote · ✔ solo player contains a 3-zombie outbreak
 - **G-8** (S) Economy v0 · code: `server/EconomyStore` (replicated), cash HUD · assets: none · ✔ day income = admissions × fee; deny pays nothing
@@ -96,7 +94,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-*(empty — groom from Backlog)*
+- **G-5** (M) Day cycle skeleton · code: `server/DayCycle` state machine, Summary UI v0 (income + admissions) · assets: none · ✔ Prep → Open (12 min) → Closing → Summary loops
 
 ---
 
@@ -108,12 +106,15 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **F-4** (M) Tagged-component system · code: `shared/Component.luau` binder (CollectionService attach/detach + Attributes read) · assets: none · ✔ test model tagged `Ride` logs its attributes on spawn/despawn · *needs Studio test: hit Play — a self-spawned TestRide should log `attached {Capacity=4, Cost=500, Tier=1}` then `detached` ~3 s later*
+- **G-1** (M) Guest stream generator · code: `server/GuestSpawner`, `shared/GuestIdentity`, `shared/GameConfig` · assets: grey-box guest rig (`game/assets/GuestRig.model.json`, head 1.8 studs), gate + stand + spawn marker in park bootstrap · ✔ guests visibly queue at one stand · *needs Studio test: reopen `places/park.rbxl` (regenerated!), Play ~2 min — guests should spawn every ~13 s, glide to the stand queue, line up facing it; queue caps at 8 then logs abstract overflow*
 
 ---
 
 ## ✅ Done
 
+**🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
+
+- **F-4** (M) Tagged-component system · ✔ Studio-tested 2026-08-18: TestRide logged attributes on spawn + detach on despawn
 - **F-3** (S) CI pipeline · ✔ verified 2026-08-18: green run on main; deliberately bad push got a red X (scratch branch, since deleted)
 - **F-2** (M) Toolchain skeleton · ✔ Studio-tested 2026-08-18: `rojo serve` synced into `park.rbxl`, server + client prints in Output
 - **F-1** (S) Git init + `.gitignore` + first commit of docs · ✔ `git log` shows docs committed
