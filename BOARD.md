@@ -96,7 +96,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-- **F-4** (M) Tagged-component system · code: `shared/Component.lua` binder (CollectionService attach/detach + Attributes read) · assets: none · ✔ test model tagged `Ride` logs its attributes on spawn/despawn
+*(empty — groom from Backlog)*
 
 ---
 
@@ -108,7 +108,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-*(empty)*
+- **F-4** (M) Tagged-component system · code: `shared/Component.luau` binder (CollectionService attach/detach + Attributes read) · assets: none · ✔ test model tagged `Ride` logs its attributes on spawn/despawn · *needs Studio test: hit Play — a self-spawned TestRide should log `attached {Capacity=4, Cost=500, Tier=1}` then `detached` ~3 s later*
 
 ---
 
