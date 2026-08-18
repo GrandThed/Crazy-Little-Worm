@@ -1,0 +1,13 @@
+# Normalize line endings for text files
+* text=auto
+
+# Binary formats — never diff/normalize
+*.rbxm binary
+*.rbxmx binary
+*.rbxl binary
+*.rbxlx binary
+*.blend binary
+*.png binary
+*.jpg binary
+*.ogg binary
+*.mp3 binary
