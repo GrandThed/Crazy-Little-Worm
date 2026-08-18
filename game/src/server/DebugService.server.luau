@@ -15,7 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
-local ACTION_NAMES = { "AdvancePhase", "SpawnGuest", "DrainPark" }
+local ACTION_NAMES = { "AdvancePhase", "SpawnGuest", "DrainPark", "ApproveFront", "DenyFront" }
 
 local debugActions = Instance.new("Folder")
 debugActions.Name = "DebugActions"

@@ -1,0 +1,309 @@
+--!strict
+-- Guest lifecycle module (G-2 refactor of the G-1 spawner internals).
+-- Owns stands, queues, counter promotion/resolution, and glide movement.
+-- Driven by two thin scripts: GuestSpawner (arrivals) and GateService
+-- (decisions). Server-only; clients see guest models + replicated ticket
+-- attributes, never lifecycle state.
+
+local CollectionService = game:GetService("CollectionService")
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
+
+local Component = require(ReplicatedStorage.Shared.Component)
+local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local GuestIdentity = require(ReplicatedStorage.Shared.GuestIdentity)
+
+local rigTemplate = ServerStorage:WaitForChild("Assets"):WaitForChild("GuestRig") :: Model
+local dayStats = ServerStorage:WaitForChild("DayStats")
+local rng = Random.new()
+
+export type Verdict = "Approve" | "Deny"
+export type GuestState = "Queueing" | "AtCounter" | "Admitted" | "Denied"
+
+export type Guest = {
+	id: string,
+	model: Model,
+	identity: GuestIdentity.Identity,
+	pivotHeight: number,
+	state: GuestState,
+	target: Vector3?, -- nil = settled
+	facing: Vector3,
+}
+
+type Stand = {
+	part: BasePart,
+	queue: { Guest }, -- waiting line; the counter guest is NOT in here
+	counterGuest: Guest?,
+	capacity: number,
+}
+
+local Guests = {}
+
+-- (standPart: BasePart, guestModel: Model?) — fired on promote and on clear
+Guests.counterChanged = Instance.new("BindableEvent")
+
+local stands: { [BasePart]: Stand } = {}
+local active: { Guest } = {}
+local overflowCount = 0
+
+local function getPart(model: Model, name: string): BasePart
+	local child = model:FindFirstChild(name)
+	assert(child and child:IsA("BasePart"), ("GuestRig is missing part %q"):format(name))
+	return child
+end
+
+local function queueSlot(stand: Stand, index: number): Vector3
+	local cf = stand.part.CFrame
+	local distance = GameConfig.QueueStartOffset + (index - 1) * GameConfig.QueueSpacing
+	local slot = cf.Position + cf.LookVector * distance
+	return Vector3.new(slot.X, 0, slot.Z)
+end
+
+local function counterSpot(stand: Stand): Vector3
+	local cf = stand.part.CFrame
+	local spot = cf.Position + cf.LookVector * (GameConfig.QueueStartOffset - 2)
+	return Vector3.new(spot.X, 0, spot.Z)
+end
+
+local function spawnPosition(): Vector3
+	local marker = CollectionService:GetTagged("GuestSpawn")[1]
+	if marker and marker:IsA("BasePart") then
+		return Vector3.new(marker.Position.X, 0, marker.Position.Z)
+	end
+	return Vector3.zero
+end
+
+local function removeGuest(guest: Guest)
+	local index = table.find(active, guest)
+	if index then
+		table.remove(active, index)
+	end
+	guest.model:Destroy()
+	dayStats:SetAttribute("GuestsOnMap", #active)
+end
+
+local function retargetQueue(stand: Stand)
+	for index, guest in stand.queue do
+		guest.target = queueSlot(stand, index)
+	end
+end
+
+-- Convert one abstract overflow arrival into a real character at the queue back
+local function materializeOverflow(stand: Stand)
+	if overflowCount <= 0 or #stand.queue >= stand.capacity then
+		return
+	end
+	overflowCount -= 1
+	dayStats:SetAttribute("Overflow", overflowCount)
+	Guests.spawnArrival(false)
+end
+
+function Guests.getStands(): { Stand }
+	local list = {}
+	for _, stand in stands do
+		table.insert(list, stand)
+	end
+	return list
+end
+
+function Guests.hasStands(): boolean
+	return next(stands) ~= nil
+end
+
+-- countArrival=false is used when materializing overflow (already counted)
+function Guests.spawnArrival(countArrival: boolean?)
+	if not Guests.hasStands() then
+		return
+	end
+	if countArrival ~= false then
+		dayStats:SetAttribute("Arrivals", (dayStats:GetAttribute("Arrivals") :: number) + 1)
+	end
+
+	local best: Stand? = nil
+	for _, stand in stands do
+		if #stand.queue < stand.capacity and (not best or #stand.queue < #best.queue) then
+			best = stand
+		end
+	end
+	if not best then
+		overflowCount += 1
+		dayStats:SetAttribute("Overflow", overflowCount)
+		return
+	end
+	local stand = best :: Stand
+
+	local dayState = ReplicatedStorage:FindFirstChild("DayState")
+	local day = if dayState then dayState:GetAttribute("Day") :: number else 1
+	local identity = GuestIdentity.generate(day)
+	local appearance = identity.appearance
+
+	local model = rigTemplate:Clone()
+	model.Name = identity.name
+	getPart(model, "Body").Color = appearance.bodyColor
+	getPart(model, "Head").Color = appearance.headColor
+	getPart(model, "LeftArm").Color = appearance.headColor
+	getPart(model, "RightArm").Color = appearance.headColor
+	model:ScaleTo(appearance.scale)
+
+	local id = HttpService:GenerateGUID(false)
+	-- Ticket fields replicate with the model so InspectionUI reads them directly.
+	-- Only cosmetic/inspectable data goes here — anomaly truth stays server-only.
+	model:SetAttribute("GuestId", id)
+	model:SetAttribute("TicketName", identity.ticket.name)
+	model:SetAttribute("TicketSerial", identity.ticket.serial)
+	model:SetAttribute("TicketType", identity.ticket.ticketType)
+	model:SetAttribute("TicketDate", identity.ticket.date)
+
+	local guest: Guest = {
+		id = id,
+		model = model,
+		identity = identity,
+		pivotHeight = GameConfig.GuestPivotHeight * appearance.scale,
+		state = "Queueing",
+		target = nil,
+		facing = -stand.part.CFrame.LookVector,
+	}
+	table.insert(stand.queue, guest)
+	guest.target = queueSlot(stand, #stand.queue)
+
+	local origin = spawnPosition() + Vector3.new(0, guest.pivotHeight, 0)
+	model:PivotTo(CFrame.new(origin))
+	model.Parent = workspace
+	table.insert(active, guest)
+	dayStats:SetAttribute("GuestsOnMap", #active)
+end
+
+-- Move the front queued guest up to the counter. Returns it, or nil.
+function Guests.promoteFront(standPart: BasePart): Guest?
+	local stand = stands[standPart]
+	if not stand or stand.counterGuest or #stand.queue == 0 then
+		return nil
+	end
+	local guest = table.remove(stand.queue, 1) :: Guest
+	stand.counterGuest = guest
+	guest.state = "AtCounter"
+	guest.target = counterSpot(stand)
+	guest.facing = -standPart.CFrame.LookVector
+	retargetQueue(stand)
+	materializeOverflow(stand)
+	Guests.counterChanged:Fire(standPart, guest.model)
+	return guest
+end
+
+-- Authoritative verdict on the guest currently at this stand's counter.
+-- Returns false when guestId is stale/mismatched (client resyncs via
+-- counterChanged) — that's the reject path of the optimistic protocol.
+function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Verdict): boolean
+	local stand = stands[standPart]
+	if not stand then
+		return false
+	end
+	local guest = stand.counterGuest
+	if not guest or guest.id ~= guestId then
+		return false
+	end
+	stand.counterGuest = nil
+
+	if verdict == "Approve" then
+		guest.state = "Admitted"
+		dayStats:SetAttribute("Admissions", (dayStats:GetAttribute("Admissions") :: number) + 1)
+		dayStats:SetAttribute(
+			"Income",
+			(dayStats:GetAttribute("Income") :: number) + GameConfig.EntryFee
+		)
+		-- v0 wander: glide to a random spot inside the park and linger;
+		-- replaced by the needs AI in P-1
+		guest.target = Vector3.new(rng:NextNumber(-25, 25), 0, rng:NextNumber(-30, 20))
+	else
+		guest.state = "Denied"
+		guest.target = spawnPosition()
+	end
+
+	Guests.counterChanged:Fire(standPart, nil)
+	return true
+end
+
+function Guests.drainPark()
+	for _, stand in stands do
+		table.clear(stand.queue)
+		stand.counterGuest = nil
+		Guests.counterChanged:Fire(stand.part, nil)
+	end
+	for _, guest in active do
+		guest.model:Destroy()
+	end
+	table.clear(active)
+	overflowCount = 0
+	dayStats:SetAttribute("GuestsOnMap", 0)
+	dayStats:SetAttribute("Overflow", 0)
+	print("[Guests] park drained")
+end
+
+Component.bind("EntryStand", {
+	onAttached = function(instance)
+		if not instance:IsA("BasePart") then
+			warn("[Guests] EntryStand tag on non-part instance: " .. instance:GetFullName())
+			return
+		end
+		local capacityAttribute = instance:GetAttribute("QueueCapacity")
+		local capacity = if typeof(capacityAttribute) == "number"
+			then capacityAttribute
+			else GameConfig.DefaultQueueCapacity
+		stands[instance] = {
+			part = instance,
+			queue = {},
+			counterGuest = nil,
+			capacity = math.min(capacity, GameConfig.VisibleQueuePerStand),
+		}
+		print(("[Guests] stand registered: %s"):format(instance:GetFullName()))
+	end,
+	onDetached = function(instance)
+		local stand = stands[instance :: BasePart]
+		if not stand then
+			return
+		end
+		stands[instance :: BasePart] = nil
+		local affected = table.clone(stand.queue)
+		if stand.counterGuest then
+			table.insert(affected, stand.counterGuest)
+		end
+		for _, guest in affected do
+			removeGuest(guest)
+		end
+	end,
+})
+
+-- Glide movement + arrival handling
+RunService.Heartbeat:Connect(function(deltaTime)
+	for _, guest in table.clone(active) do
+		local target = guest.target
+		if not target then
+			continue
+		end
+		local lift = Vector3.new(0, guest.pivotHeight, 0)
+		local pivot = guest.model:GetPivot().Position
+		local flat = Vector3.new(pivot.X, 0, pivot.Z)
+		local delta = target - flat
+		if delta.Magnitude <= 0.15 then
+			guest.model:PivotTo(CFrame.lookAt(target + lift, target + lift + guest.facing))
+			guest.target = nil
+			if guest.state == "Denied" then
+				removeGuest(guest)
+			elseif guest.state == "Admitted" then
+				task.delay(rng:NextNumber(15, 30), function()
+					if table.find(active, guest) and guest.state == "Admitted" then
+						removeGuest(guest)
+					end
+				end)
+			end
+		else
+			local step = math.min(GameConfig.GuestWalkSpeed * deltaTime, delta.Magnitude)
+			local nextPosition = flat + delta.Unit * step + lift
+			guest.model:PivotTo(CFrame.lookAt(nextPosition, nextPosition + delta.Unit))
+		end
+	end
+end)
+
+return Guests

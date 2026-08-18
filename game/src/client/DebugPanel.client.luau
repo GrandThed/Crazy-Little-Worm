@@ -109,6 +109,14 @@ makeButton("Drain park", function()
 	debugCommand:FireServer("DrainPark")
 end)
 
+makeButton("Approve front ✅", function()
+	debugCommand:FireServer("ApproveFront")
+end)
+
+makeButton("Deny front ⛔", function()
+	debugCommand:FireServer("DenyFront")
+end)
+
 task.spawn(function()
 	while true do
 		local lines = {
