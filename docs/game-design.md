@@ -200,7 +200,23 @@ Four nested loops, each with its own reward beat:
 
 **Deliberate non-patterns** (things we will NOT do): no offline/appointment timers — the park only runs while played, so there's no FOMO pressure; no paid detection or anomaly-power — monetization (later) is cosmetic only. Compulsion comes from the loop, not from dark patterns.
 
-## 11. Open questions
+## 11. G-9 playtest findings (2026-08-18, 3 solo days, grey-box M1 build)
+
+**Verdict: GO — proceed to M2 (park sim).** The gate loop works as a foundation; no finding blocks building the tycoon layer on top of it.
+
+| Question | Finding | Action |
+|---|---|---|
+| Inspection fun over time | Playable but needs refinement to carry the game | **Deferred by design**: revisit in a dedicated refinement pass once the base systems (M2–M3) exist — G-3 juice alone isn't the answer, the *decision* needs more texture (rule days A-7, subtler tells help here) |
+| Three-way tension (wave/scrutinize/deny) | Too soon to test — economy has no spending, no attraction index yet | Retest after P-2 (build menu) + P-5 (live index) give choices weight |
+| Infected legibility | **Yes** — tells read, spotting one feels earned | Keep the tell design as the template for the other four anomalies |
+| Outbreak as drop-everything moment | **Untestable — bug**: admitted guests despawned after ~15–30 s (placeholder linger), so the park was always empty before the 90 s incubation fired | **Fixed**: guests now dwell 3–5 min wandering the park; retest pending |
+| 12-minute day | **Just right** | Lock it |
+| Cash-driven decisions | No way to spend cash yet | Expected — P-2 introduces spending; retest tension then |
+| Unprompted fun | Too soon | Recheck each milestone |
+
+**Systemic lesson (recorded as a design constraint):** guest dwell time must always exceed the longest anomaly activation timer, or anomalies silently can't happen. Any future dwell/despawn tuning must respect `dwell > incubation`.
+
+## 12. Open questions
 
 - Player-set entry price vs. fixed (v0: fixed).
 - Tool/building catalog beyond: cameras, infirmary, salt bucket, capture net, manager clipboard.

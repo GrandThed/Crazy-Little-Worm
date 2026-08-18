@@ -50,6 +50,12 @@ local GameConfig = {
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,
 
+	-- v0 dwell (G-9 finding): admitted guests wander the park this long before
+	-- heading home — must exceed infected incubation or outbreaks can't happen.
+	-- P-1 needs AI replaces this with real behavior-driven dwell.
+	GuestDwellSecondsMin = 180,
+	GuestDwellSecondsMax = 300,
+
 	-- Grey-box park interior where admitted guests wander/flee (studs)
 	ParkBounds = { minX = -30, maxX = 30, minZ = -35, maxZ = 25 },
 }

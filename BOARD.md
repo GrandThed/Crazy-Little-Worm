@@ -95,13 +95,13 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-- **G-9** (M) **Fun-check playtest** · owner: **Benjamin** · code: none · assets: none · ✔ 3 full solo days played at real speed (no debug ×); go/no-go findings written into docs/game-design.md · *note sheet: [docs/playtest-g9.md](docs/playtest-g9.md)*
+*(empty — pull from Ready)*
 
 ---
 
 ## 👀 Review
 
-*(empty)*
+- **G-9** (M) **Fun-check playtest** · owner: **Benjamin** · ✔ 3 days played, verdict **GO**, findings in [game-design.md §11](docs/game-design.md) · *one retest pending: outbreak at real speed now that guests dwell 3–5 min (was: despawned in ~15 s, park empty before incubation — fixed)*
 
 ---
 

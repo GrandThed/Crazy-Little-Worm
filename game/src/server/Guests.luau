@@ -27,6 +27,7 @@ export type GuestState =
 	| "Admitted"
 	| "Denied"
 	| "WalkedAway"
+	| "Leaving" -- dwell expired, heading home content
 	| "Converting" -- §4: tagged by a zombie, timer running (Infected owns the timer)
 	| "Zombie"
 
@@ -41,6 +42,7 @@ export type Guest = {
 	patience: number, -- §3: decays while Queueing; 0 = walkaway
 	emoteLabel: TextLabel,
 	speed: number, -- studs/s; zombies run faster than guests
+	dwell: number, -- simulated seconds left in the park once Admitted
 }
 
 export type SpawnOptions = {
@@ -112,6 +114,15 @@ local function spawnPosition(): Vector3
 		return Vector3.new(marker.Position.X, 0, marker.Position.Z)
 	end
 	return Vector3.zero
+end
+
+local function randomParkPoint(): Vector3
+	local bounds = GameConfig.ParkBounds
+	return Vector3.new(
+		rng:NextNumber(bounds.minX, bounds.maxX),
+		0,
+		rng:NextNumber(bounds.minZ, bounds.maxZ)
+	)
 end
 
 -- Anger emote above the head (G-4 grey-box asset: emoji billboard; final art
@@ -250,6 +261,7 @@ function Guests.spawnArrival(options: SpawnOptions?)
 		patience = GameConfig.PatienceMax,
 		emoteLabel = makeEmoteBillboard(getPart(model, "Head")),
 		speed = GameConfig.GuestWalkSpeed,
+		dwell = 0,
 	}
 	table.insert(stand.queue, guest)
 	guest.target = queueSlot(stand, #stand.queue)
@@ -310,14 +322,11 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 			(dayStats:GetAttribute("Income") :: number) + GameConfig.EntryFee
 		)
 		EconomyStore.add(GameConfig.EntryFee)
-		-- v0 wander: glide to a random spot inside the park and linger;
+		-- v0 wander (dwell must outlast infected incubation — G-9 finding);
 		-- replaced by the needs AI in P-1
-		local bounds = GameConfig.ParkBounds
-		guest.target = Vector3.new(
-			rng:NextNumber(bounds.minX, bounds.maxX),
-			0,
-			rng:NextNumber(bounds.minZ, bounds.maxZ)
-		)
+		guest.dwell =
+			rng:NextNumber(GameConfig.GuestDwellSecondsMin, GameConfig.GuestDwellSecondsMax)
+		guest.target = randomParkPoint()
 		for _, callback in admittedCallbacks do
 			callback(guest)
 		end
@@ -376,6 +385,21 @@ task.spawn(function()
 		task.wait(1)
 		-- decay in simulated seconds so the debug time scale compresses waits too
 		local decay = GameConfig.PatienceDecayPerSecond * GameConfig.timeScale()
+
+		-- Admitted guests: burn dwell, wander between random spots, then head
+		-- home content (Leaving guests despawn at the gate)
+		for _, guest in table.clone(active) do
+			if guest.state == "Admitted" then
+				guest.dwell -= GameConfig.timeScale()
+				if guest.dwell <= 0 then
+					guest.state = "Leaving"
+					guest.target = spawnPosition()
+				elseif not guest.target and rng:NextNumber() < 0.3 then
+					guest.target = randomParkPoint()
+				end
+			end
+		end
+
 		for _, stand in stands do
 			local counterGuest = stand.counterGuest
 			if counterGuest then
@@ -466,14 +490,12 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		if delta.Magnitude <= 0.15 then
 			guest.model:PivotTo(CFrame.lookAt(target + lift, target + lift + guest.facing))
 			guest.target = nil
-			if guest.state == "Denied" or guest.state == "WalkedAway" then
+			if
+				guest.state == "Denied"
+				or guest.state == "WalkedAway"
+				or guest.state == "Leaving"
+			then
 				removeGuest(guest)
-			elseif guest.state == "Admitted" then
-				task.delay(rng:NextNumber(15, 30) / GameConfig.timeScale(), function()
-					if table.find(active, guest) and guest.state == "Admitted" then
-						removeGuest(guest)
-					end
-				end)
 			end
 		else
 			local step = math.min(guest.speed * deltaTime, delta.Magnitude)

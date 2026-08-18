@@ -308,6 +308,7 @@ function Infected.netHit(position: Vector3): string?
 
 	-- Cured mid-conversion: thumbs-up and resume the day (§4 tone rule)
 	guest.state = "Admitted"
+	guest.dwell = math.max(guest.dwell, 60) -- stick around a while after the rescue
 	guest.emoteLabel.Text = "👍"
 	(guest.emoteLabel.Parent :: BillboardGui).Enabled = true
 	task.delay(1.5, function()

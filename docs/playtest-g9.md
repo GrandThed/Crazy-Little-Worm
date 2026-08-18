@@ -1,5 +1,9 @@
 # G-9 Fun-check playtest — note sheet
 
+> **Completed 2026-08-18.** Findings distilled into
+> [game-design.md §11](game-design.md). One retest pending: outbreak feel at
+> real speed, after the guest-dwell fix.
+
 **Protocol:** 3 full solo days at real speed (no debug time scale — the 12-minute
 pacing is what's being tested). Debug panel allowed only for reading stats, not
 for changing them. Day 1 is anomaly-free by design; days 2–3 each have a ~70%
