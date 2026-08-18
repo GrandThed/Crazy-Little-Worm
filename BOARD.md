@@ -41,10 +41,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic F — Foundation (M0)
 
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
-- **G-3** (S) Inspection juice · code: tween/sound hooks in InspectionUI · assets: stamp model + 2 stamp SFX, coin SFX, coin-fly particle · ✔ still satisfying after 20 stamps in a row
 - **G-6** (M) Infected end-to-end · code: `server/anomalies/AnomalyBase` + `Infected` component (incubation, chase, convert, Fear AoE) · assets: pale/green skin params on guest rig, cough anim, zombie chase anim · ✔ a missed infected visibly cascades to 3+ zombies
 - **G-7** (S) Capture net + tool rack · code: `shared/ToolRack`, net tool component · assets: net + wall-rack grey-box, evaporation puff particle, thumbs-up emote · ✔ solo player contains a 3-zombie outbreak
-- **G-8** (S) Economy v0 · code: `server/EconomyStore` (replicated), cash HUD · assets: none · ✔ day income = admissions × fee; deny pays nothing
 - **G-9** (M) **Fun-check playtest** · code: none · assets: none · ✔ 3 full solo days played; go/no-go findings written into docs/game-design.md
 
 ### Epic P — Park sim (M2) — spec: §1, §2, §5, §6, §9
@@ -94,7 +92,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-- **G-4** (M) Queue patience · code: patience decay + walkaway in GuestSpawner/QueueService · assets: anger emote billboard icons (😐😠🤬) · ✔ an ignored queue visibly drains itself
+- **G-3** (S) Inspection juice · code: tween/sound hooks in InspectionUI · assets: stamp model + 2 stamp SFX, coin SFX, coin-fly particle · ✔ still satisfying after 20 stamps in a row
+- **G-8** (S) Economy v0 · code: `server/EconomyStore` (replicated), cash HUD · assets: none · ✔ day income = admissions × fee; deny pays nothing
 
 ---
 
@@ -106,7 +105,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **G-2** (M) Ticket inspection UI · code: `client/InspectionUI`, `server/GateService`, `server/Guests` module (queue/counter lifecycle), optimistic Decide/Ack remotes (request-id) · assets: ticket card UI (placeholder styling) · ✔ decision feels instant; server logs authoritative result · *needs Studio test: Open gates → walk to stand → prompt "Man the stand" → ticket card shows front guest; Approve admits (walks into park, admissions+income tick), Deny sends them home; card resolves instantly, next guest steps up; also test debug Approve/Deny front buttons; 2-player test rides with next co-op session*
+- **G-4** (M) Queue patience · code: patience decay + walkaway in `server/Guests`, Walkaways stat through summary/HUD/debug · assets: anger emote billboards (😐😠🤬 at ≤60/≤30/≤10 patience) · ✔ an ignored queue visibly drains itself · *needs Studio test: Open gates, don't man the stand (or press debug "Sap patience") — faces appear over heads, guests storm off one by one, walkout counter ticks, Summary shows Walkaways*
 
 ---
 
@@ -114,6 +113,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 **🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
 
+- **G-2** (M) Ticket inspection UI · ✔ Studio-tested 2026-08-18: instant optimistic decisions, authoritative server log, close-button fix verified; 2-player check deferred to next co-op session
 - **F-5** (M) Debug panel · ✔ Studio-tested 2026-08-18: speed/skip/spawn/drain + live stats all working from the panel
 - **G-5** (M) Day cycle skeleton · ✔ Studio-tested 2026-08-18: full Prep → Open → Closing → Summary → Day 2 loop; arrivals only while Open; park drains at Summary
 - **G-1** (M) Guest stream generator · ✔ Studio-tested 2026-08-18: guests spawn at day-1 rate, queue at the stand, overflow counts abstractly (after CFrame-vs-Position asset fix)

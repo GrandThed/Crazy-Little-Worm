@@ -28,6 +28,7 @@ dayStats.Name = "DayStats"
 dayStats:SetAttribute("Arrivals", 0)
 dayStats:SetAttribute("Admissions", 0)
 dayStats:SetAttribute("Income", 0)
+dayStats:SetAttribute("Walkaways", 0)
 dayStats.Parent = ServerStorage
 
 local remotes = Instance.new("Folder")
@@ -83,6 +84,7 @@ local function resetStats()
 	dayStats:SetAttribute("Arrivals", 0)
 	dayStats:SetAttribute("Admissions", 0)
 	dayStats:SetAttribute("Income", 0)
+	dayStats:SetAttribute("Walkaways", 0)
 end
 
 openGatesRemote.OnServerEvent:Connect(function()
@@ -124,6 +126,7 @@ task.spawn(function()
 			arrivals = dayStats:GetAttribute("Arrivals"),
 			admissions = dayStats:GetAttribute("Admissions"),
 			income = dayStats:GetAttribute("Income"),
+			walkaways = dayStats:GetAttribute("Walkaways"),
 		})
 		waitForAdvance()
 

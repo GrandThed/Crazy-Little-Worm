@@ -21,10 +21,12 @@ task.spawn(function()
 	local debugActions = ServerStorage:WaitForChild("DebugActions")
 	local spawnAction = debugActions:WaitForChild("SpawnGuest") :: BindableEvent
 	local drainAction = debugActions:WaitForChild("DrainPark") :: BindableEvent
+	local sapAction = debugActions:WaitForChild("SapPatience") :: BindableEvent
 	spawnAction.Event:Connect(function()
 		Guests.spawnArrival()
 	end)
 	drainAction.Event:Connect(Guests.drainPark)
+	sapAction.Event:Connect(Guests.sapPatience)
 end)
 
 local arrivalsPerMinute = GameConfig.arrivalsPerMinute(GameConfig.Day1AttractionIndex)

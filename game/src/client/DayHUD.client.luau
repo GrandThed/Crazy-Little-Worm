@@ -13,7 +13,13 @@ local openGatesRemote = remotes:WaitForChild("OpenGates") :: RemoteEvent
 local nextDayRemote = remotes:WaitForChild("NextDay") :: RemoteEvent
 local daySummaryRemote = remotes:WaitForChild("DaySummary") :: RemoteEvent
 
-type SummaryPayload = { day: number, arrivals: number, admissions: number, income: number }
+type SummaryPayload = {
+	day: number,
+	arrivals: number,
+	admissions: number,
+	income: number,
+	walkaways: number,
+}
 
 local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
@@ -125,9 +131,10 @@ end)
 
 daySummaryRemote.OnClientEvent:Connect(function(payload: SummaryPayload)
 	summaryTitle.Text = ("Day %d Summary"):format(payload.day)
-	summaryBody.Text = ("Admissions:  %d\nArrivals:  %d\nIncome:  $%d"):format(
+	summaryBody.Text = ("Admissions:  %d\nArrivals:  %d\nWalkaways:  %d\nIncome:  $%d"):format(
 		payload.admissions,
 		payload.arrivals,
+		payload.walkaways,
 		payload.income
 	)
 	continueButton.Text = ("Start Day %d"):format(payload.day + 1)

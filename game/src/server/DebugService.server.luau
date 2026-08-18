@@ -15,7 +15,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
-local ACTION_NAMES = { "AdvancePhase", "SpawnGuest", "DrainPark", "ApproveFront", "DenyFront" }
+local ACTION_NAMES =
+	{ "AdvancePhase", "SpawnGuest", "DrainPark", "ApproveFront", "DenyFront", "SapPatience" }
 
 local debugActions = Instance.new("Folder")
 debugActions.Name = "DebugActions"
@@ -60,7 +61,9 @@ if RunService:IsStudio() then
 	local dayStats = ServerStorage:WaitForChild("DayStats")
 	task.spawn(function()
 		while true do
-			for _, attribute in { "Arrivals", "Admissions", "Income", "GuestsOnMap", "Overflow" } do
+			for _, attribute in
+				{ "Arrivals", "Admissions", "Income", "GuestsOnMap", "Overflow", "Walkaways" }
+			do
 				debugState:SetAttribute(attribute, dayStats:GetAttribute(attribute) or 0)
 			end
 			debugState:SetAttribute("DaySpeed", workspace:GetAttribute("DaySpeedMultiplier") or 1)

@@ -19,6 +19,14 @@ local GameConfig = {
 	QueueStartOffset = 4, -- studs from stand front to first queue slot
 	GuestPivotHeight = 2.3, -- rig bounding-box center above ground, at scale 1
 
+	-- §3 queue patience: 100 at arrival, −1/s while waiting, walkaway at 0
+	PatienceMax = 100,
+	PatienceDecayPerSecond = 1,
+	-- Emote thresholds (patience ≤ value shows the face)
+	PatienceAnnoyedAt = 60,
+	PatienceAngryAt = 30,
+	PatienceFuriousAt = 10,
+
 	-- §5 day cycle: Prep (untimed) → Open → Closing → Summary (waits for continue)
 	OpenDurationSeconds = 12 * 60,
 	ClosingDurationSeconds = 2 * 60,

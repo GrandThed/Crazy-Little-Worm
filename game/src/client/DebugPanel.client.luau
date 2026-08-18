@@ -117,6 +117,10 @@ makeButton("Deny front ⛔", function()
 	debugCommand:FireServer("DenyFront")
 end)
 
+makeButton("Sap patience 😠", function()
+	debugCommand:FireServer("SapPatience")
+end)
+
 task.spawn(function()
 	while true do
 		local lines = {
@@ -126,6 +130,7 @@ task.spawn(function()
 			("guests  %s"):format(tostring(debugState:GetAttribute("GuestsOnMap") or 0)),
 			("queue+  %s"):format(tostring(debugState:GetAttribute("Overflow") or 0)),
 			("arrived %s"):format(tostring(debugState:GetAttribute("Arrivals") or 0)),
+			("walkout %s"):format(tostring(debugState:GetAttribute("Walkaways") or 0)),
 			("admits  %s"):format(tostring(debugState:GetAttribute("Admissions") or 0)),
 			("income  $%s"):format(tostring(debugState:GetAttribute("Income") or 0)),
 		}

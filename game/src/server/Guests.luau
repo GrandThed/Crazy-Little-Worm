@@ -20,7 +20,7 @@ local dayStats = ServerStorage:WaitForChild("DayStats")
 local rng = Random.new()
 
 export type Verdict = "Approve" | "Deny"
-export type GuestState = "Queueing" | "AtCounter" | "Admitted" | "Denied"
+export type GuestState = "Queueing" | "AtCounter" | "Admitted" | "Denied" | "WalkedAway"
 
 export type Guest = {
 	id: string,
@@ -30,6 +30,8 @@ export type Guest = {
 	state: GuestState,
 	target: Vector3?, -- nil = settled
 	facing: Vector3,
+	patience: number, -- §3: decays while Queueing; 0 = walkaway
+	emoteLabel: TextLabel,
 }
 
 type Stand = {
@@ -73,6 +75,40 @@ local function spawnPosition(): Vector3
 		return Vector3.new(marker.Position.X, 0, marker.Position.Z)
 	end
 	return Vector3.zero
+end
+
+-- Anger emote above the head (G-4 grey-box asset: emoji billboard; final art
+-- may swap in icon images — same label, no code change needed elsewhere)
+local function makeEmoteBillboard(head: BasePart): TextLabel
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "AngerEmote"
+	billboard.Size = UDim2.fromOffset(44, 44)
+	billboard.StudsOffsetWorldSpace = Vector3.new(0, 1.6, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Enabled = false
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.fromScale(1, 1)
+	label.TextScaled = true
+	label.Text = ""
+	label.Parent = billboard
+	billboard.Parent = head
+	return label
+end
+
+local function updateEmote(guest: Guest)
+	local billboard = guest.emoteLabel.Parent :: BillboardGui
+	local patience = guest.patience
+	if patience <= GameConfig.PatienceFuriousAt then
+		guest.emoteLabel.Text = "🤬"
+	elseif patience <= GameConfig.PatienceAngryAt then
+		guest.emoteLabel.Text = "😠"
+	elseif patience <= GameConfig.PatienceAnnoyedAt then
+		guest.emoteLabel.Text = "😐"
+	else
+		guest.emoteLabel.Text = ""
+	end
+	billboard.Enabled = guest.emoteLabel.Text ~= ""
 end
 
 local function removeGuest(guest: Guest)
@@ -164,6 +200,8 @@ function Guests.spawnArrival(countArrival: boolean?)
 		state = "Queueing",
 		target = nil,
 		facing = -stand.part.CFrame.LookVector,
+		patience = GameConfig.PatienceMax,
+		emoteLabel = makeEmoteBillboard(getPart(model, "Head")),
 	}
 	table.insert(stand.queue, guest)
 	guest.target = queueSlot(stand, #stand.queue)
@@ -224,6 +262,46 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 	Guests.counterChanged:Fire(standPart, nil)
 	return true
 end
+
+-- §3 walkaway: lost revenue now, satisfaction penalty when the index lands (P-5)
+local function walkAway(stand: Stand, queueIndex: number)
+	local guest = table.remove(stand.queue, queueIndex) :: Guest
+	guest.state = "WalkedAway"
+	guest.target = spawnPosition()
+	dayStats:SetAttribute("Walkaways", (dayStats:GetAttribute("Walkaways") :: number? or 0) + 1)
+	print(("[Guests] %s ran out of patience and left"):format(guest.model.Name))
+	retargetQueue(stand)
+	materializeOverflow(stand)
+end
+
+-- Debug hook (F-5): drop every queued guest to near-zero patience
+function Guests.sapPatience()
+	for _, stand in stands do
+		for _, guest in stand.queue do
+			guest.patience = math.min(guest.patience, GameConfig.PatienceFuriousAt + 2)
+			updateEmote(guest)
+		end
+	end
+end
+
+-- Patience decay (§3): only guests waiting in line lose patience; the guest
+-- being served at the counter doesn't
+task.spawn(function()
+	while true do
+		task.wait(1)
+		for _, stand in stands do
+			for index = #stand.queue, 1, -1 do
+				local guest = stand.queue[index]
+				guest.patience -= GameConfig.PatienceDecayPerSecond
+				if guest.patience <= 0 then
+					walkAway(stand, index)
+				else
+					updateEmote(guest)
+				end
+			end
+		end
+	end
+end)
 
 function Guests.drainPark()
 	for _, stand in stands do
@@ -289,7 +367,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		if delta.Magnitude <= 0.15 then
 			guest.model:PivotTo(CFrame.lookAt(target + lift, target + lift + guest.facing))
 			guest.target = nil
-			if guest.state == "Denied" then
+			if guest.state == "Denied" or guest.state == "WalkedAway" then
 				removeGuest(guest)
 			elseif guest.state == "Admitted" then
 				task.delay(rng:NextNumber(15, 30), function()
