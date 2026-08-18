@@ -63,6 +63,8 @@ places/                # lobby.rbxl, park.rbxl
 
 Task tracking lives in [BOARD.md](BOARD.md) (kanban) — view it as a board with `node tools/board-viewer/serve.mjs` (VS Code task: *Board: viewer (live)*); see [tools/board-viewer/README.md](tools/board-viewer/README.md). Rules that bind Claude sessions too: pull from Ready right-to-left, WIP ≤ 2, every feature card carries `code:` and `assets:` lines, and every feature follows the board's grey-box-first feature flow (code never waits for final art; assets bind via tag + attributes so art swaps are zero-code). Move cards as work starts/finishes and keep acceptance criteria honest.
 
+**Debuggability rule:** every feature with tunable or stateful behavior wires its knobs into the Studio-only debug panel as part of wire-up — a command in `server/DebugService` + a control/readout in `client/DebugPanel`. Studio testing must never require command-bar incantations. All debug commands are hard-gated server-side on `RunService:IsStudio()`.
+
 ## Build order
 
 1. Rojo + toolchain skeleton, empty park place, git init.

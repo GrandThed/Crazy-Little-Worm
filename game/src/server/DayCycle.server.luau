@@ -44,6 +44,8 @@ daySummaryRemote.Parent = remotes
 remotes.Parent = ReplicatedStorage
 
 local currentDay = 1
+local currentPhase = "Prep"
+local advanceRequested = false
 
 -- Studio-only fast-forward: set a DaySpeedMultiplier attribute on Workspace
 -- (e.g. 20) in the command bar to compress the 12-minute day for testing
@@ -56,6 +58,7 @@ local function scaled(seconds: number): number
 end
 
 local function setPhase(phase: string, duration: number?)
+	currentPhase = phase
 	dayState:SetAttribute("Phase", phase)
 	dayState:SetAttribute(
 		"PhaseEndsAt",
@@ -64,25 +67,56 @@ local function setPhase(phase: string, duration: number?)
 	print(("[DayCycle] day %d — %s"):format(currentDay, phase))
 end
 
+-- Blocks until the phase deadline passes (nil = untimed) or something requests
+-- an advance: the phase-appropriate player remote, or the debug skip (F-5)
+local function waitForAdvance(deadline: number?)
+	advanceRequested = false
+	while not advanceRequested do
+		if deadline and workspace:GetServerTimeNow() >= deadline then
+			return
+		end
+		task.wait(0.1)
+	end
+end
+
 local function resetStats()
 	dayStats:SetAttribute("Arrivals", 0)
 	dayStats:SetAttribute("Admissions", 0)
 	dayStats:SetAttribute("Income", 0)
 end
 
+openGatesRemote.OnServerEvent:Connect(function()
+	if currentPhase == "Prep" then
+		advanceRequested = true
+	end
+end)
+nextDayRemote.OnServerEvent:Connect(function()
+	if currentPhase == "Summary" then
+		advanceRequested = true
+	end
+end)
+
+-- Debug skip (F-5): DebugService owns the DebugActions folder
+task.spawn(function()
+	local advanceAction = ServerStorage:WaitForChild("DebugActions"):WaitForChild("AdvancePhase");
+	(advanceAction :: BindableEvent).Event:Connect(function()
+		advanceRequested = true
+	end)
+end)
+
 task.spawn(function()
 	while true do
 		resetStats()
 		setPhase("Prep")
-		openGatesRemote.OnServerEvent:Wait()
+		waitForAdvance()
 
 		local openDuration = scaled(GameConfig.OpenDurationSeconds)
 		setPhase("Open", openDuration)
-		task.wait(openDuration)
+		waitForAdvance(workspace:GetServerTimeNow() + openDuration)
 
 		local closingDuration = scaled(GameConfig.ClosingDurationSeconds)
 		setPhase("Closing", closingDuration)
-		task.wait(closingDuration)
+		waitForAdvance(workspace:GetServerTimeNow() + closingDuration)
 
 		setPhase("Summary")
 		daySummaryRemote:FireAllClients({
@@ -91,7 +125,7 @@ task.spawn(function()
 			admissions = dayStats:GetAttribute("Admissions"),
 			income = dayStats:GetAttribute("Income"),
 		})
-		nextDayRemote.OnServerEvent:Wait()
+		waitForAdvance()
 
 		currentDay += 1
 		dayState:SetAttribute("Day", currentDay)

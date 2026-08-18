@@ -32,6 +32,8 @@ Spec ──► Grey-box assets ──► Code ──► Wire-up ──► Studio
 
 The component system is what makes stage 6 free — that's why F-4 is in the first milestone.
 
+**Debuggability rule (F-5):** every card that adds tunable or stateful behavior also wires its knobs into the Debug panel as part of Wire-up — a dispatch entry in `DebugService` (server) + a button/readout in `DebugPanel` (client). Testing a feature must never require command-bar incantations.
+
 ---
 
 ## 📋 Backlog
@@ -105,7 +107,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-- **G-5** (M) Day cycle skeleton · code: `server/DayCycle` state machine, `client/DayHUD`, GuestSpawner phase gating · assets: none · ✔ Prep → Open (12 min) → Closing → Summary loops · *needs Studio test: set `workspace` attribute `DaySpeedMultiplier = 20` in command bar to compress the day; loop Prep → Open → Closing → Summary → Day 2 Prep; guests only arrive while Open, park drains at Summary*
+- **F-5** (M) Debug panel · code: `client/DebugPanel`, `server/DebugService` (Studio-gated `DebugCommand` remote, `DebugActions` bindables, DayCycle skip hook) · assets: none · ✔ from the panel: set day speed, skip any phase, force-spawn a guest, drain the park, live stats readout · *test together with G-5*
+- **G-5** (M) Day cycle skeleton · code: `server/DayCycle` state machine, `client/DayHUD`, GuestSpawner phase gating · assets: none · ✔ Prep → Open (12 min) → Closing → Summary loops · *needs Studio test (use the F-5 debug panel): loop Prep → Open → Closing → Summary → Day 2 Prep; guests only arrive while Open, park drains at Summary*
 
 ---
 

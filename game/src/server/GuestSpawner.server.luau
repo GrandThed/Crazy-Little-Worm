@@ -82,6 +82,7 @@ local function spawnGuest()
 	if not stand then
 		-- §1: arrivals beyond the visible queue front are counters, not characters
 		overflowCount += 1
+		dayStats:SetAttribute("Overflow", overflowCount)
 		print(
 			("[GuestSpawner] visible queues full — %d arrivals waiting abstractly"):format(
 				overflowCount
@@ -115,6 +116,7 @@ local function spawnGuest()
 	model:PivotTo(CFrame.new(origin))
 	model.Parent = workspace
 	table.insert(guests, guest)
+	dayStats:SetAttribute("GuestsOnMap", #guests)
 end
 
 Component.bind("EntryStand", {
@@ -182,6 +184,8 @@ local function drainPark()
 	end
 	table.clear(guests)
 	overflowCount = 0
+	dayStats:SetAttribute("GuestsOnMap", 0)
+	dayStats:SetAttribute("Overflow", 0)
 	print("[GuestSpawner] park drained")
 end
 
@@ -189,6 +193,15 @@ dayState:GetAttributeChangedSignal("Phase"):Connect(function()
 	if dayState:GetAttribute("Phase") == "Summary" then
 		drainPark()
 	end
+end)
+
+-- Debug hooks (F-5): force one arrival (ignores phase + rate) / drain now
+task.spawn(function()
+	local debugActions = ServerStorage:WaitForChild("DebugActions")
+	local spawnAction = debugActions:WaitForChild("SpawnGuest") :: BindableEvent
+	local drainAction = debugActions:WaitForChild("DrainPark") :: BindableEvent
+	spawnAction.Event:Connect(spawnGuest)
+	drainAction.Event:Connect(drainPark)
 end)
 
 local arrivalsPerMinute = GameConfig.arrivalsPerMinute(GameConfig.Day1AttractionIndex)
