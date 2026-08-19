@@ -52,6 +52,14 @@ local GameConfig = {
 	AnomalyMinIndex = { Infected = 0, Aliens = 0, Spy = 200, Cult = 400, Shapeshifter = 600 },
 	AnomalySpawnWindow = { 0.05, 0.85 },
 
+	-- §5/§8 ticket-rule days (A-7): from day 3, ~40% of days carry a rule;
+	-- ~15% of that day's tickets violate it; admitted violators fine at Summary
+	RuleDayStartsDay = 3,
+	RuleDayChance = 0.4,
+	RuleViolatorChance = 0.15,
+	CounterfeitFine = 25,
+	CultFinePerGuest = 200, -- §4 police bribe per disappeared guest (A-5b)
+
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,

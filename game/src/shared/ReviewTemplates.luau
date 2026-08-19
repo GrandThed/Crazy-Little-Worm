@@ -14,6 +14,12 @@ export type DayEvents = {
 	staffQuit: number,
 	loanBalance: number,
 	stars: number, -- park star rating for generic picks
+	-- Epic A events
+	counterfeits: number, -- admitted rule-day violators (A-7)
+	tampered: number, -- spy sabotage acts (A-3)
+	launched: number, -- rides launched into space (A-4)
+	disappeared: number, -- guests lost to a completed ritual (A-5b)
+	salted: number, -- cultists evaporated (A-5b)
 }
 
 type Template = { stars: number, text: string, when: (DayEvents) -> boolean }
@@ -101,6 +107,52 @@ local TEMPLATES: { Template } = {
 		text = "park seems… financially stressed? where ferris wheel",
 		when = function(e)
 			return e.loanBalance > 0
+		end,
+	},
+	-- rule days (A-7)
+	{
+		stars = 2,
+		text = "gate security let a guy with a CRAYON ticket walk right in",
+		when = function(e)
+			return e.counterfeits >= 1
+		end,
+	},
+	-- spy (A-3)
+	{
+		stars = 2,
+		text = "a man in a suit was doing something to the bumper cars. sir??",
+		when = function(e)
+			return e.tampered >= 1
+		end,
+	},
+	-- aliens (A-4)
+	{
+		stars = 5,
+		text = "saw a man launch into space. ten stars. best day of my life",
+		when = function(e)
+			return e.launched >= 1
+		end,
+	},
+	{
+		stars = 1,
+		text = "the ride I was queueing for is in ORBIT now?",
+		when = function(e)
+			return e.launched >= 1
+		end,
+	},
+	-- cult (A-5)
+	{
+		stars = 1,
+		text = "waited 40 minutes, wife joined a cult",
+		when = function(e)
+			return e.disappeared >= 1
+		end,
+	},
+	{
+		stars = 4,
+		text = "someone threw salt at a chanting man and he EVAPORATED. good hustle",
+		when = function(e)
+			return e.salted >= 1
 		end,
 	},
 	-- generic by rating

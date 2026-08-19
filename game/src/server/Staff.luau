@@ -13,6 +13,7 @@ local AnomalyBase = require(script.Parent.anomalies.AnomalyBase)
 local Attractions = require(script.Parent.Attractions)
 local EconomyStore = require(script.Parent.EconomyStore)
 local Guests = require(script.Parent.Guests)
+local TicketRules = require(script.Parent.TicketRules)
 
 local assets = ServerStorage:WaitForChild("Assets")
 local dayStats = ServerStorage:WaitForChild("DayStats")
@@ -242,7 +243,10 @@ task.spawn(function()
 				if not guest then
 					break
 				end
+				-- §3: clerks apply the same accuracy roll to anomalies AND
+				-- rule-day violators (A-7) — a bad ticket is a bad ticket
 				local isAnomaly = AnomalyBase.get(guest.id) ~= nil
+					or not TicketRules.isValid(guest.identity.ticket)
 				local verdict: Guests.Verdict
 				if isAnomaly then
 					verdict = if rng:NextNumber() < GameConfig.ClerkAccuracy[member.tier]

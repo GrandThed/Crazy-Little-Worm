@@ -15,6 +15,7 @@ local Component = require(ReplicatedStorage.Shared.Component)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local GuestIdentity = require(ReplicatedStorage.Shared.GuestIdentity)
 local EconomyStore = require(script.Parent.EconomyStore)
+local TicketRules = require(script.Parent.TicketRules)
 
 local rigTemplate = ServerStorage:WaitForChild("Assets"):WaitForChild("GuestRig") :: Model
 local dayStats = ServerStorage:WaitForChild("DayStats")
@@ -263,6 +264,7 @@ function Guests.spawnArrival(options: SpawnOptions?)
 	local dayState = ReplicatedStorage:FindFirstChild("DayState")
 	local day = if dayState then dayState:GetAttribute("Day") :: number else 1
 	local identity = GuestIdentity.generate(day)
+	TicketRules.applyToTicket(identity.ticket) -- §5 rule days (A-7) reshape fresh tickets
 	local appearance = identity.appearance
 
 	local model = rigTemplate:Clone()
@@ -356,6 +358,13 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 	hideEmote(guest)
 	if verdict == "Approve" then
 		guest.state = "Admitted"
+		if not TicketRules.isValid(guest.identity.ticket) then
+			-- A-7: an admitted rule-violator becomes a counterfeit fine at Summary
+			dayStats:SetAttribute(
+				"CounterfeitAdmits",
+				(dayStats:GetAttribute("CounterfeitAdmits") :: number? or 0) + 1
+			)
+		end
 		dayStats:SetAttribute("Admissions", (dayStats:GetAttribute("Admissions") :: number) + 1)
 		dayStats:SetAttribute(
 			"Income",

@@ -35,6 +35,9 @@ dayStats:SetAttribute("FoodIncome", 0)
 dayStats:SetAttribute("Breakdowns", 0)
 dayStats:SetAttribute("Wages", 0)
 dayStats:SetAttribute("Fled", 0)
+dayStats:SetAttribute("CounterfeitAdmits", 0)
+dayStats:SetAttribute("Fines", 0)
+dayStats:SetAttribute("Disappeared", 0)
 dayStats.Parent = ServerStorage
 
 local remotes = Instance.new("Folder")
@@ -121,6 +124,9 @@ local function resetStats()
 	dayStats:SetAttribute("Breakdowns", 0)
 	dayStats:SetAttribute("Wages", 0)
 	dayStats:SetAttribute("Fled", 0)
+	dayStats:SetAttribute("CounterfeitAdmits", 0)
+	dayStats:SetAttribute("Fines", 0)
+	dayStats:SetAttribute("Disappeared", 0)
 	staffQuitToday = 0
 end
 
@@ -164,6 +170,12 @@ task.spawn(function()
 		-- Summary v1 (P-8): settle wages + loan first so the numbers are final
 		local wagesPaid = Staff.settleWages()
 		local loanRepaid = EconomyStore.repayLoanDaily()
+		-- A-7 counterfeit fines (A-5b police bribes add to the same pot);
+		-- collected up to cash on hand — the floor rule holds (§7)
+		local finesDue = statNumber("CounterfeitAdmits") * GameConfig.CounterfeitFine
+			+ statNumber("Disappeared") * GameConfig.CultFinePerGuest
+		local finesPaid = EconomyStore.deductUpTo(finesDue)
+		dayStats:SetAttribute("Fines", finesPaid)
 		local satisfaction = IndexStore.getSatisfaction()
 		local stars = math.clamp(math.floor(1 + 4 * satisfaction + 0.5), 1, 5)
 		local reviews = ReviewTemplates.pick({
@@ -175,6 +187,11 @@ task.spawn(function()
 			staffQuit = staffQuitToday,
 			loanBalance = EconomyStore.getLoanBalance(),
 			stars = stars,
+			counterfeits = statNumber("CounterfeitAdmits"),
+			tampered = statNumber("Tampered"),
+			launched = statNumber("Launched"),
+			disappeared = statNumber("Disappeared"),
+			salted = statNumber("Salted"),
 		}, 3)
 		daySummaryRemote:FireAllClients({
 			day = currentDay,
@@ -185,6 +202,9 @@ task.spawn(function()
 			foodIncome = statNumber("FoodIncome"),
 			wages = wagesPaid,
 			loanRepaid = loanRepaid,
+			fines = finesPaid,
+			counterfeits = statNumber("CounterfeitAdmits"),
+			disappeared = statNumber("Disappeared"),
 			zombies = statNumber("Zombies"),
 			captured = statNumber("Captured"),
 			breakdowns = statNumber("Breakdowns"),

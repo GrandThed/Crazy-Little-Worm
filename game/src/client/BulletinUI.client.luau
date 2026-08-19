@@ -63,7 +63,7 @@ dateline.Text = "— Day 1 —"
 dateline.Parent = paper
 
 local divider = Instance.new("Frame")
-divider.Position = UDim2.new(0, 24, 0, 74)
+divider.Position = UDim2.fromOffset(24, 74)
 divider.Size = UDim2.new(1, -48, 0, 2)
 divider.BackgroundColor3 = Color3.fromRGB(110, 98, 82)
 divider.BorderSizePixel = 0

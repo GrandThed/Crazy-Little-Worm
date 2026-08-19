@@ -23,6 +23,9 @@ type SummaryPayload = {
 	foodIncome: number,
 	wages: number,
 	loanRepaid: number,
+	fines: number,
+	counterfeits: number,
+	disappeared: number,
 	zombies: number,
 	captured: number,
 	breakdowns: number,
@@ -224,7 +227,15 @@ daySummaryRemote.OnClientEvent:Connect(function(payload: SummaryPayload)
 		("food sales   $%d"):format(payload.foodIncome),
 		("wages        -$%d"):format(payload.wages),
 		("loan repaid  -$%d"):format(payload.loanRepaid),
-		("net          $%d"):format(payload.income - payload.wages - payload.loanRepaid),
+		("fines        -$%d%s"):format(
+			payload.fines,
+			if payload.counterfeits > 0 or payload.disappeared > 0
+				then (" (%d fakes, %d missing)"):format(payload.counterfeits, payload.disappeared)
+				else ""
+		),
+		("net          $%d"):format(
+			payload.income - payload.wages - payload.loanRepaid - payload.fines
+		),
 		"",
 		("zombies %d · netted %d · breakdowns %d"):format(
 			payload.zombies,

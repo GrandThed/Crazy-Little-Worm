@@ -38,6 +38,17 @@ function EconomyStore.trySpend(amount: number): boolean
 	return true
 end
 
+-- Fines (A-7 counterfeits, A-5b police bribes): deduct what's payable — cash
+-- never goes negative (§7). Returns what was actually collected.
+function EconomyStore.deductUpTo(amount: number): number
+	assert(amount >= 0, "fine amounts are positive")
+	local payment = math.min(amount, EconomyStore.getCash())
+	if payment > 0 then
+		state:SetAttribute("Cash", EconomyStore.getCash() - payment)
+	end
+	return payment
+end
+
 -- §7 anti-soft-lock loan (P-9): +2000 cash, one loan at a time
 function EconomyStore.getLoanBalance(): number
 	return state:GetAttribute("LoanBalance") :: number
