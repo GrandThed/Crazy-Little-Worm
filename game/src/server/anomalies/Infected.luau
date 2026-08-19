@@ -12,6 +12,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local AnomalyBase = require(script.Parent.AnomalyBase)
 local Guests = require(script.Parent.Parent.Guests)
+local IndexStore = require(script.Parent.Parent.IndexStore)
 
 local dayStats = ServerStorage:WaitForChild("DayStats")
 local rng = Random.new()
@@ -98,7 +99,10 @@ local function zombify(case: Case)
 		(coughLabel.Parent :: BillboardGui):Destroy()
 		case.coughLabel = nil
 	end
-	dayStats:SetAttribute("Zombies", (dayStats:GetAttribute("Zombies") :: number? or 0) + 1)
+	-- §4 severity: 8 for the outbreak, +2 per further conversion
+	local zombiesToday = dayStats:GetAttribute("Zombies") :: number? or 0
+	IndexStore.addIncident(if zombiesToday == 0 then 8 else 2)
+	dayStats:SetAttribute("Zombies", zombiesToday + 1)
 	print(("[Anomaly] %s turned!"):format(guest.model.Name))
 end
 
@@ -173,7 +177,7 @@ task.spawn(function()
 				local nearest: Guests.Guest? = nil
 				local nearestDistance = math.huge
 				for _, other in Guests.getActive() do
-					if other.state == "Admitted" then
+					if other.state == "Admitted" and not other.busy then
 						local distance = (guestPosition(other) - zombiePosition).Magnitude
 						if distance < nearestDistance then
 							nearest = other
@@ -192,9 +196,10 @@ task.spawn(function()
 			end
 		end
 
-		-- Flee pass: healthy admitted guests run from nearby zombies
+		-- Flee pass: healthy admitted guests run from nearby zombies, and the
+		-- scare raises Fear (§1) — enough seconds near a zombie triggers Fleeing
 		for _, guest in Guests.getActive() do
-			if guest.state ~= "Admitted" then
+			if guest.state ~= "Admitted" or guest.busy then
 				continue
 			end
 			local position = guestPosition(guest)
@@ -203,6 +208,8 @@ task.spawn(function()
 					local zombiePosition = guestPosition(case.guest)
 					local offset = position - zombiePosition
 					if offset.Magnitude < GameConfig.ZombieScareRadius then
+						guest.needs.Fear =
+							math.min(100, guest.needs.Fear + GameConfig.ZombieFearHit * simDt)
 						local direction = if offset.Magnitude > 0.1
 							then offset.Unit
 							else Vector3.new(1, 0, 0)

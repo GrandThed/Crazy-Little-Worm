@@ -28,8 +28,11 @@ export type GuestState =
 	| "Denied"
 	| "WalkedAway"
 	| "Leaving" -- dwell expired, heading home content
+	| "Fleeing" -- §1: Fear > 70, scared exit
 	| "Converting" -- §4: tagged by a zombie, timer running (Infected owns the timer)
 	| "Zombie"
+
+export type Needs = { Fun: number, Hunger: number, Bladder: number, Fear: number }
 
 export type Guest = {
 	id: string,
@@ -43,6 +46,9 @@ export type Guest = {
 	emoteLabel: TextLabel,
 	speed: number, -- studs/s; zombies run faster than guests
 	dwell: number, -- simulated seconds left in the park once Admitted
+	needs: Needs, -- §1 needs system (GuestNeeds drives decay/decisions)
+	busy: boolean, -- riding/using a facility; ignored by zombies + decisions
+	wasAdmitted: boolean,
 }
 
 export type SpawnOptions = {
@@ -68,9 +74,24 @@ local overflowCount = 0
 
 -- Extension points for the anomaly layer (plain callbacks — BindableEvents
 -- would deep-copy the guest table and break identity)
+export type ExitReason = "left" | "fled" | "walkaway"
+
 local anomalyMarkers: { [string]: (Guest) -> () } = {}
 local admittedCallbacks: { (Guest) -> () } = {}
 local drainedCallbacks: { () -> () } = {}
+local exitCallbacks: { (Guest, ExitReason) -> () } = {}
+
+-- Fired when a guest exits the park on their own feet (satisfaction input,
+-- §1 exit happiness). Zombified/captured guests never "exit".
+function Guests.onExit(callback: (Guest, ExitReason) -> ())
+	table.insert(exitCallbacks, callback)
+end
+
+local function reportExit(guest: Guest, reason: ExitReason)
+	for _, callback in exitCallbacks do
+		callback(guest, reason)
+	end
+end
 
 function Guests.registerAnomalyMarker(name: string, marker: (Guest) -> ())
 	anomalyMarkers[name] = marker
@@ -87,6 +108,14 @@ end
 -- Live list — callers iterate, never mutate
 function Guests.getActive(): { Guest }
 	return active
+end
+
+function Guests.exitPosition(): Vector3
+	local marker = CollectionService:GetTagged("GuestSpawn")[1]
+	if marker and marker:IsA("BasePart") then
+		return Vector3.new(marker.Position.X, 0, marker.Position.Z)
+	end
+	return Vector3.zero
 end
 
 local function getPart(model: Model, name: string): BasePart
@@ -211,6 +240,9 @@ function Guests.spawnArrival(options: SpawnOptions?)
 	if not Guests.hasStands() then
 		return
 	end
+	if #active >= GameConfig.GuestCap then
+		return -- §1 performance cap on simulated guests
+	end
 	if opts.countArrival ~= false then
 		dayStats:SetAttribute("Arrivals", (dayStats:GetAttribute("Arrivals") :: number) + 1)
 	end
@@ -262,6 +294,14 @@ function Guests.spawnArrival(options: SpawnOptions?)
 		emoteLabel = makeEmoteBillboard(getPart(model, "Head")),
 		speed = GameConfig.GuestWalkSpeed,
 		dwell = 0,
+		needs = {
+			Fun = rng:NextNumber(40, 70), -- they came here for fun
+			Hunger = rng:NextNumber(60, 90),
+			Bladder = rng:NextNumber(70, 100),
+			Fear = 0,
+		},
+		busy = false,
+		wasAdmitted = false,
 	}
 	table.insert(stand.queue, guest)
 	guest.target = queueSlot(stand, #stand.queue)
@@ -322,8 +362,9 @@ function Guests.resolveCounter(standPart: BasePart, guestId: string, verdict: Ve
 			(dayStats:GetAttribute("Income") :: number) + GameConfig.EntryFee
 		)
 		EconomyStore.add(GameConfig.EntryFee)
-		-- v0 wander (dwell must outlast infected incubation — G-9 finding);
-		-- replaced by the needs AI in P-1
+		guest.wasAdmitted = true
+		-- dwell floor (must outlast infected incubation — G-9 finding);
+		-- the needs AI (P-1) drives what they do inside
 		guest.dwell =
 			rng:NextNumber(GameConfig.GuestDwellSecondsMin, GameConfig.GuestDwellSecondsMax)
 		guest.target = randomParkPoint()
@@ -490,11 +531,16 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		if delta.Magnitude <= 0.15 then
 			guest.model:PivotTo(CFrame.lookAt(target + lift, target + lift + guest.facing))
 			guest.target = nil
-			if
-				guest.state == "Denied"
-				or guest.state == "WalkedAway"
-				or guest.state == "Leaving"
-			then
+			if guest.state == "Denied" then
+				removeGuest(guest)
+			elseif guest.state == "WalkedAway" then
+				reportExit(guest, "walkaway") -- §3: counts as an unhappy exit
+				removeGuest(guest)
+			elseif guest.state == "Leaving" then
+				reportExit(guest, "left")
+				removeGuest(guest)
+			elseif guest.state == "Fleeing" then
+				reportExit(guest, "fled")
 				removeGuest(guest)
 			end
 		else

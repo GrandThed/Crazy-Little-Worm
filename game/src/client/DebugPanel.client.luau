@@ -14,6 +14,7 @@ end
 local dayState = ReplicatedStorage:WaitForChild("DayState")
 local debugState = ReplicatedStorage:WaitForChild("DebugState")
 local economyState = ReplicatedStorage:WaitForChild("EconomyState")
+local indexState = ReplicatedStorage:WaitForChild("IndexState")
 local debugCommand =
 	ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DebugCommand") :: RemoteEvent
 
@@ -145,6 +146,8 @@ task.spawn(function()
 			("admits  %s"):format(tostring(debugState:GetAttribute("Admissions") or 0)),
 			("income  $%s"):format(tostring(debugState:GetAttribute("Income") or 0)),
 			("cash    $%s"):format(tostring(economyState:GetAttribute("Cash") or 0)),
+			("index   %d"):format(tonumber(indexState:GetAttribute("Index")) or 0),
+			("satisf  %.2f"):format(tonumber(indexState:GetAttribute("Satisfaction")) or 0),
 		}
 		statsLabel.Text = table.concat(lines, "\n")
 		task.wait(0.25)

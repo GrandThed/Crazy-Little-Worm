@@ -29,18 +29,22 @@ task.spawn(function()
 	sapAction.Event:Connect(Guests.sapPatience)
 end)
 
-local arrivalsPerMinute = GameConfig.arrivalsPerMinute(GameConfig.Day1AttractionIndex)
-print(("[GuestSpawner] day-1 stream: %.1f arrivals/min"):format(arrivalsPerMinute))
-
--- Accumulate simulated time so the debug time scale speeds arrivals up
--- immediately; §5: guests only arrive while the gates are open
+-- §2 inflow wired to the LIVE attraction index (P-5): the interval re-derives
+-- every tick, so park growth immediately raises the arrival stream.
+-- Accumulates simulated time so the debug time scale applies instantly;
+-- §5: guests only arrive while the gates are open.
 task.spawn(function()
-	local interval = 60 / arrivalsPerMinute
+	local indexState = ReplicatedStorage:WaitForChild("IndexState")
 	local accumulated = 0
 	while true do
 		local elapsed = task.wait(0.25)
 		if dayState:GetAttribute("Phase") == "Open" then
+			local index = indexState:GetAttribute("Index")
+			local perMinute = GameConfig.arrivalsPerMinute(
+				if typeof(index) == "number" then index else GameConfig.Day1AttractionIndex
+			)
 			accumulated += elapsed * GameConfig.timeScale()
+			local interval = 60 / perMinute
 			if accumulated >= interval then
 				accumulated -= interval
 				Guests.spawnArrival()

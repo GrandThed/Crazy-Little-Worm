@@ -50,6 +50,21 @@ local GameConfig = {
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,
 
+	-- §1 needs system: decay per simulated second (Fear decays TOWARD zero)
+	NeedDecay = { Fun = 0.2, Hunger = 0.1, Bladder = 0.08 },
+	FearDecayPerSecond = 0.5,
+	FleeFearThreshold = 70, -- §1: Fear > 70 → Fleeing → scared exit
+	ZombieFearHit = 25, -- Fear added when a zombie scares a nearby guest
+	NeedWeights = { Fun = 1.0, Hunger = 0.9, Bladder = 1.1 },
+	NeedSeekThreshold = 30, -- urgency below this = keep wandering
+	DecisionIntervalSeconds = 5, -- §1: decision rule every ~5 s
+	GuestCap = 120, -- §1 performance cap on simulated guests
+
+	-- Ride operation (P-3): cycle waits this long for more riders before running
+	RideLoadWaitSeconds = 8,
+	RideConditionPerCycle = 2, -- condition lost per operating cycle (P-6)
+	FacilityCapacity = 2,
+
 	-- v0 dwell (G-9 finding): admitted guests wander the park this long before
 	-- heading home — must exceed infected incubation or outbreaks can't happen.
 	-- P-1 needs AI replaces this with real behavior-driven dwell.
