@@ -32,6 +32,7 @@ export type GuestState =
 	| "Fleeing" -- §1: Fear > 70, scared exit
 	| "Converting" -- §4: tagged by a zombie, timer running (Infected owns the timer)
 	| "Zombie"
+	| "OnMission" -- §4: anomaly-driven movement (spy/alien/cult); needs AI hands off
 
 export type Needs = { Fun: number, Hunger: number, Bladder: number, Fear: number }
 
@@ -208,6 +209,28 @@ function Guests.despawn(guest: Guest)
 	removeGuest(guest)
 end
 
+-- Grey-box briefcase prop (A-3): worn by the spy AND by innocent businessmen
+-- (§3: every tell has an innocent lookalike). PivotTo moves all model parts,
+-- so a plain anchored child part rides along.
+function Guests.attachBriefcase(model: Model)
+	if model:FindFirstChild("Briefcase") then
+		return
+	end
+	local body = model:FindFirstChild("Body")
+	if not (body and body:IsA("BasePart")) then
+		return
+	end
+	local case = Instance.new("Part")
+	case.Name = "Briefcase"
+	case.Anchored = true
+	case.CanCollide = false
+	case.Size = Vector3.new(0.9, 0.7, 0.3) * model:GetScale()
+	case.Color = Color3.fromRGB(96, 62, 32)
+	case.Material = Enum.Material.SmoothPlastic
+	case.CFrame = body.CFrame * CFrame.new(body.Size.X / 2 + 0.35, -body.Size.Y / 2, 0)
+	case.Parent = model
+end
+
 local function retargetQueue(stand: Stand)
 	for index, guest in stand.queue do
 		guest.target = queueSlot(stand, index)
@@ -274,6 +297,9 @@ function Guests.spawnArrival(options: SpawnOptions?)
 	getPart(model, "LeftArm").Color = appearance.headColor
 	getPart(model, "RightArm").Color = appearance.headColor
 	model:ScaleTo(appearance.scale)
+	if appearance.briefcase then
+		Guests.attachBriefcase(model) -- §3 ambiguity: legit businessmen exist (A-3)
+	end
 
 	local id = HttpService:GenerateGUID(false)
 	-- Ticket fields replicate with the model so InspectionUI reads them directly.
@@ -437,9 +463,11 @@ task.spawn(function()
 		local decay = GameConfig.PatienceDecayPerSecond * GameConfig.timeScale()
 
 		-- Admitted guests: burn dwell, wander between random spots, then head
-		-- home content (Leaving guests despawn at the gate)
+		-- home content (Leaving guests despawn at the gate). Busy guests are
+		-- mid-ride/mid-refill: their dwell clock pauses and they must never be
+		-- retargeted out of a seat (A-3 guard).
 		for _, guest in table.clone(active) do
-			if guest.state == "Admitted" then
+			if guest.state == "Admitted" and not guest.busy then
 				guest.dwell -= GameConfig.timeScale()
 				if guest.dwell <= 0 then
 					guest.state = "Leaving"

@@ -19,6 +19,7 @@ export type Appearance = {
 	bodyColor: Color3,
 	headColor: Color3,
 	scale: number,
+	briefcase: boolean, -- businessman look (§3: the spy's innocent lookalike)
 }
 
 export type Identity = {
@@ -101,6 +102,13 @@ local HEAD_COLORS = {
 	Color3.fromRGB(139, 94, 60),
 }
 
+-- Businessman suits (A-3): rich, not desaturated — the spy hides among these
+local SUIT_COLORS = {
+	Color3.fromRGB(52, 68, 130), -- navy
+	Color3.fromRGB(78, 60, 118), -- plum pinstripe (in spirit)
+}
+local BUSINESSMAN_CHANCE = 0.07 -- fraction of adult guests in a suit
+
 local GuestIdentity = {}
 
 local function rollTicketType(): TicketType
@@ -128,6 +136,8 @@ function GuestIdentity.generate(day: number): Identity
 		scale = rng:NextNumber(0.95, 1.15)
 	end
 
+	local businessman = ticketType ~= "Child" and rng:NextNumber() < BUSINESSMAN_CHANCE
+
 	return {
 		name = name,
 		ticket = {
@@ -140,9 +150,12 @@ function GuestIdentity.generate(day: number): Identity
 			date = ("Day %d"):format(day),
 		},
 		appearance = {
-			bodyColor = BODY_COLORS[rng:NextInteger(1, #BODY_COLORS)],
+			bodyColor = if businessman
+				then SUIT_COLORS[rng:NextInteger(1, #SUIT_COLORS)]
+				else BODY_COLORS[rng:NextInteger(1, #BODY_COLORS)],
 			headColor = HEAD_COLORS[rng:NextInteger(1, #HEAD_COLORS)],
 			scale = scale,
+			briefcase = businessman,
 		},
 	}
 end

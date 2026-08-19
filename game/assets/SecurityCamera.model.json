@@ -1,0 +1,46 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Pole",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"Size": [0.5, 5, 0.5],
+				"CFrame": [0, 2.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.35, 0.37, 0.42],
+				"Material": "SmoothPlastic",
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "CameraHead",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [1.2, 0.8, 1.6],
+				"CFrame": [0, 5.3, -0.5, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.16, 0.17, 0.2],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Lens",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Shape": "Cylinder",
+				"Size": [0.2, 0.5, 0.5],
+				"CFrame": [0, 5.3, -1.35, 0, 0, -1, 0, 1, 0, 1, 0, 0],
+				"Color": [0.3, 0.65, 0.9],
+				"Material": "SmoothPlastic"
+			}
+		}
+	],
+	"properties": {
+		"WorldPivot": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+	}
+}

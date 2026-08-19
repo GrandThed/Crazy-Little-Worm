@@ -136,6 +136,10 @@ makeButton("Spawn infected 🧟", function()
 	debugCommand:FireServer("SpawnInfected")
 end)
 
+makeButton("Spawn spy 🕵️", function()
+	debugCommand:FireServer("SpawnSpy")
+end)
+
 makeButton("Force rule day 📜", function()
 	debugCommand:FireServer("ForceRuleDay")
 end)

@@ -5,7 +5,7 @@
 -- ServerStorage.Assets; rides without bespoke grey-boxes yet use GenericRide
 -- (recolored) until their asset card lands.
 
-export type Kind = "Ride" | "Facility"
+export type Kind = "Ride" | "Facility" | "Building"
 
 export type Entry = {
 	id: string,
@@ -24,6 +24,9 @@ export type Entry = {
 	refillNeed: ("Hunger" | "Bladder")?,
 	serviceSeconds: number?,
 	revenue: number?, -- paid by the guest on use (food)
+	-- Building fields (A-3/A-8 anomaly buildings, §9)
+	tag: string?, -- CollectionService tag to bind (defaults to kind)
+	radius: number?, -- effect radius attribute (camera alerts, busker aura)
 }
 
 local Catalog: { Entry } = {
@@ -138,7 +141,28 @@ local Catalog: { Entry } = {
 		refillNeed = "Bladder",
 		serviceSeconds = 6,
 	},
+	-- §9 anomaly buildings (A-3/A-8) — accepted on Building AND Facility pads
+	{
+		id = "SecurityCamera",
+		name = "Security Camera",
+		kind = "Building",
+		cost = 900,
+		unlockIndex = 200,
+		template = "SecurityCamera",
+		tag = "SecurityCamera",
+		radius = 30,
+	},
 }
+
+-- Plot acceptance (A-3): rides and facilities keep their dedicated pads;
+-- anomaly buildings fit Building pads or spare Facility pads (v0 — dedicated
+-- Building pads in the map are encouraged for camera coverage)
+local function plotAccepts(plotKind: unknown, entry: Entry): boolean
+	if entry.kind == "Building" then
+		return plotKind == "Building" or plotKind == "Facility"
+	end
+	return plotKind == entry.kind
+end
 
 local byId: { [string]: Entry } = {}
 for _, entry in Catalog do
@@ -148,4 +172,5 @@ end
 return {
 	entries = Catalog,
 	byId = byId,
+	plotAccepts = plotAccepts,
 }

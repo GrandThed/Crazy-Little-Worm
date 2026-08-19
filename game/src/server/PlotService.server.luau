@@ -64,10 +64,12 @@ local function buildOn(plotPart: BasePart, entry: Catalog.Entry): Model?
 		model:SetAttribute("BaseAppeal", entry.baseAppeal)
 		model:SetAttribute("RideSeconds", entry.rideSeconds)
 		model:SetAttribute("Speed", entry.speed)
-	else
+	elseif entry.kind == "Facility" then
 		model:SetAttribute("RefillNeed", entry.refillNeed)
 		model:SetAttribute("ServiceSeconds", entry.serviceSeconds)
 		model:SetAttribute("Revenue", entry.revenue or 0)
+	elseif entry.radius then
+		model:SetAttribute("Radius", entry.radius)
 	end
 
 	-- Templates author their WorldPivot at ground level with identity rotation,
@@ -75,7 +77,7 @@ local function buildOn(plotPart: BasePart, entry: Catalog.Entry): Model?
 	-- a rotated first part used to tip whole models sideways)
 	model:PivotTo(CFrame.new(plotPart.Position.X, 0.4, plotPart.Position.Z))
 	model.Parent = workspace
-	model:AddTag(entry.kind) -- binds RideService / FacilityService components
+	model:AddTag(entry.tag or entry.kind) -- binds the matching component
 
 	plots[plotPart] = model
 	plotPart:SetAttribute("OccupiedBy", entry.id)
@@ -130,7 +132,7 @@ buildRemote.OnServerEvent:Connect(function(player, payload: unknown)
 	if dayState:GetAttribute("Phase") ~= "Prep" then
 		return ack(false, "build during Prep")
 	end
-	if plotPart:GetAttribute("PlotKind") ~= entry.kind then
+	if not Catalog.plotAccepts(plotPart:GetAttribute("PlotKind"), entry) then
 		return ack(false, ("needs a %s plot"):format(entry.kind))
 	end
 	if currentIndex() < entry.unlockIndex then

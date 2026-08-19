@@ -60,6 +60,17 @@ local GameConfig = {
 	CounterfeitFine = 25,
 	CultFinePerGuest = 200, -- §4 police bribe per disappeared guest (A-5b)
 
+	-- §4 corporate spy (A-3): 15s tamper → condition −40 (<30 = breakdown),
+	-- up to 3 rides, severity 6 per ride broken
+	SpyActivationDelay = { 20, 45 }, -- sim-seconds of blending after admission
+	SpyTamperSeconds = 15,
+	SpyConditionDamage = 40,
+	SpyBreakThreshold = 30,
+	SpyMaxRides = 3,
+	SpySeverityPerRide = 6,
+	SpyRevealSeconds = 8, -- camera ping keeps them highlighted/nettable this long
+	CameraDefaultRadius = 30,
+
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,

@@ -148,7 +148,7 @@ function refreshPlots()
 		if not plotPart:IsA("BasePart") then
 			continue
 		end
-		if plotPart:GetAttribute("PlotKind") ~= entry.kind then
+		if not Catalog.plotAccepts(plotPart:GetAttribute("PlotKind"), entry) then
 			continue
 		end
 		if plotPart:GetAttribute("OccupiedBy") ~= nil then

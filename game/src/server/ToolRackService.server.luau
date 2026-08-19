@@ -9,7 +9,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local Component = require(ReplicatedStorage.Shared.Component)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
-local Infected = require(script.Parent.anomalies.Infected)
+local NetTargets = require(script.Parent.anomalies.NetTargets)
 
 local assets = ServerStorage:WaitForChild("Assets")
 
@@ -40,11 +40,12 @@ local function onSwing(player: Player)
 		return
 	end
 	local position = Vector3.new(root.Position.X, 0, root.Position.Z)
-	local result = Infected.netHit(position)
-	if result == "zombie" then
-		playSoundAt(root, "rbxasset://sounds/snap.mp3", 0.6)
-	elseif result == "cured" then
+	-- Generic catch (§9): nearest target across every registered anomaly
+	local result = NetTargets.swing(position, GameConfig.NetRange)
+	if result == "cured" then
 		playSoundAt(root, "rbxasset://sounds/electronicpingshort.wav", 1.2)
+	elseif result ~= nil then
+		playSoundAt(root, "rbxasset://sounds/snap.mp3", 0.6)
 	end
 end
 

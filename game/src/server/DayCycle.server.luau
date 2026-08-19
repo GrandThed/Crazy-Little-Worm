@@ -38,6 +38,10 @@ dayStats:SetAttribute("Fled", 0)
 dayStats:SetAttribute("CounterfeitAdmits", 0)
 dayStats:SetAttribute("Fines", 0)
 dayStats:SetAttribute("Disappeared", 0)
+dayStats:SetAttribute("Tampered", 0)
+dayStats:SetAttribute("Launched", 0)
+dayStats:SetAttribute("Salted", 0)
+dayStats:SetAttribute("Cured", 0)
 dayStats.Parent = ServerStorage
 
 local remotes = Instance.new("Folder")
@@ -127,6 +131,10 @@ local function resetStats()
 	dayStats:SetAttribute("CounterfeitAdmits", 0)
 	dayStats:SetAttribute("Fines", 0)
 	dayStats:SetAttribute("Disappeared", 0)
+	dayStats:SetAttribute("Tampered", 0)
+	dayStats:SetAttribute("Launched", 0)
+	dayStats:SetAttribute("Salted", 0)
+	dayStats:SetAttribute("Cured", 0)
 	staffQuitToday = 0
 end
 

@@ -298,6 +298,32 @@ function Attractions.repairTick(model: Model, amount: number): boolean
 	return condition >= 100
 end
 
+-- Spy sabotage (A-3), per §4: condition −40; below the threshold the ride
+-- breaks on the spot. Severity is charged by the caller. Returns broke.
+function Attractions.sabotage(model: Model, amount: number): boolean
+	local ride = rides[model]
+	if not ride or isBroken(model) then
+		return false
+	end
+	local condition = math.max(0, attributeNumber(model, "Condition", 100) - amount)
+	model:SetAttribute("Condition", condition)
+	print(("[Attractions] %s condition sabotaged to %d%%"):format(model.Name, condition))
+	if condition < GameConfig.SpyBreakThreshold then
+		breakDown(ride)
+		return true
+	end
+	return false
+end
+
+-- Live ride models (anomaly targeting: spy picks by appeal, aliens by speed)
+function Attractions.getRideModels(): { Model }
+	local list = {}
+	for model in rides do
+		table.insert(list, model)
+	end
+	return list
+end
+
 function Attractions.getBrokenRides(): { Model }
 	local broken = {}
 	for model in rides do
