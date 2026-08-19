@@ -17,6 +17,7 @@ local Component = require(ReplicatedStorage.Shared.Component)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local NetTargets = require(script.Parent.anomalies.NetTargets)
 local EconomyStore = require(script.Parent.EconomyStore)
+local Staff = require(script.Parent.Staff)
 
 local assets = ServerStorage:WaitForChild("Assets")
 local dayState = ReplicatedStorage:WaitForChild("DayState")
@@ -57,6 +58,13 @@ local TOOLS: { [string]: ToolDef } = {
 		unlockIndex = 400,
 		swingChannel = "salt",
 		swingRange = GameConfig.SaltRange,
+	},
+	Clipboard = {
+		display = "Manager Clipboard",
+		template = "Clipboard",
+		cost = 600,
+		unlockIndex = 600,
+		onActivated = Staff.clipboardInspect, -- A-6 shapeshifter check
 	},
 }
 

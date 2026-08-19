@@ -99,6 +99,13 @@ local GameConfig = {
 	CultLockDelaySeconds = 60, -- §9 bathroom lock: +60s of picking first
 	CultConvergeTimeoutSeconds = 45, -- stragglers don't stall the ritual forever
 
+	-- §4 shapeshifter (A-6): replaces an isolated staff NPC after 120s;
+	-- mimic does nothing; clipboard reveal charges severity 10 + loses staff
+	ShapeshifterReplaceSeconds = 120,
+	ShapeshifterIsolationRadius = 14, -- studs; no player this close = "isolated"
+	ShapeshifterSeverity = 10,
+	ClipboardRange = 8,
+
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,

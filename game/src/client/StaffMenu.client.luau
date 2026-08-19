@@ -60,6 +60,28 @@ status.Text = "wages paid at Summary"
 status.LayoutOrder = 99
 status.Parent = panel
 
+-- A-6: know your staff by NAME — the shapeshifter forges these on tickets
+local staffState = ReplicatedStorage:WaitForChild("StaffState")
+local rosterLabel = Instance.new("TextLabel")
+rosterLabel.Size = UDim2.fromScale(1, 0)
+rosterLabel.AutomaticSize = Enum.AutomaticSize.Y
+rosterLabel.BackgroundTransparency = 1
+rosterLabel.TextColor3 = Color3.fromRGB(170, 180, 210)
+rosterLabel.Font = Enum.Font.Code
+rosterLabel.TextSize = 12
+rosterLabel.TextXAlignment = Enum.TextXAlignment.Left
+rosterLabel.TextWrapped = true
+rosterLabel.Text = ""
+rosterLabel.LayoutOrder = 100
+rosterLabel.Parent = panel
+
+local function refreshRoster()
+	local roster = staffState:GetAttribute("Roster") :: string
+	rosterLabel.Text = if roster == "" then "(no staff yet)" else roster
+end
+staffState:GetAttributeChangedSignal("Roster"):Connect(refreshRoster)
+refreshRoster()
+
 local function hireButton(text: string, kind: string, tier: number, order: number)
 	local button = Instance.new("TextButton")
 	button.LayoutOrder = order

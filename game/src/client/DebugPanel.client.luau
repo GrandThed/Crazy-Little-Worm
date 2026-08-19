@@ -148,6 +148,10 @@ makeButton("Spawn cultists 🕯", function()
 	debugCommand:FireServer("SpawnCultists")
 end)
 
+makeButton("Spawn shapeshifter 🎭", function()
+	debugCommand:FireServer("SpawnShapeshifter")
+end)
+
 makeButton("Force rule day 📜", function()
 	debugCommand:FireServer("ForceRuleDay")
 end)

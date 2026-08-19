@@ -1,0 +1,45 @@
+{
+	"className": "Tool",
+	"properties": {
+		"ToolTip": "Manager Clipboard — inspect a staff member"
+	},
+	"children": [
+		{
+			"name": "Handle",
+			"className": "Part",
+			"properties": {
+				"Size": [1.4, 1.9, 0.15],
+				"CFrame": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.55, 0.38, 0.22],
+				"Material": "SmoothPlastic",
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth",
+				"CanCollide": false
+			}
+		},
+		{
+			"name": "Paper",
+			"className": "Part",
+			"properties": {
+				"Size": [1.2, 1.6, 0.05],
+				"CFrame": [0, -0.05, -0.1, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.96, 0.96, 0.93],
+				"Material": "SmoothPlastic",
+				"CanCollide": false,
+				"Massless": true
+			}
+		},
+		{
+			"name": "Clip",
+			"className": "Part",
+			"properties": {
+				"Size": [0.6, 0.25, 0.25],
+				"CFrame": [0, 0.9, -0.05, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.75, 0.77, 0.8],
+				"Material": "SmoothPlastic",
+				"CanCollide": false,
+				"Massless": true
+			}
+		}
+	]
+}

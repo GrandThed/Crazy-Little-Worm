@@ -28,6 +28,7 @@ local ACTION_NAMES = {
 	"SpawnSpy",
 	"SpawnAlien",
 	"SpawnCultists",
+	"SpawnShapeshifter",
 	"ForceRuleDay",
 }
 

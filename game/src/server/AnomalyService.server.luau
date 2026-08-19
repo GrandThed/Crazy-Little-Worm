@@ -12,6 +12,7 @@ local Aliens = require(script.Parent.anomalies.Aliens)
 local Cult = require(script.Parent.anomalies.Cult)
 local Infected = require(script.Parent.anomalies.Infected)
 local Scheduler = require(script.Parent.anomalies.Scheduler)
+local Shapeshifter = require(script.Parent.anomalies.Shapeshifter)
 local Spy = require(script.Parent.anomalies.Spy)
 local TicketRules = require(script.Parent.TicketRules)
 
@@ -40,6 +41,12 @@ Scheduler.register({
 	spawn = Cult.beginDay,
 	trickle = true, -- §4: members insert across the whole day
 })
+Scheduler.register({
+	name = "Shapeshifter",
+	minIndex = GameConfig.AnomalyMinIndex.Shapeshifter,
+	spawn = Shapeshifter.spawnOne,
+	canSpawn = Shapeshifter.canSpawn, -- needs staff worth impersonating
+})
 
 -- Debug hooks (F-5): force an arrival of each type / force a rule day now
 task.spawn(function()
@@ -52,6 +59,8 @@ task.spawn(function()
 	spawnAlien.Event:Connect(Aliens.spawnOne)
 	local spawnCultists = debugActions:WaitForChild("SpawnCultists") :: BindableEvent
 	spawnCultists.Event:Connect(Cult.debugBatch)
+	local spawnShapeshifter = debugActions:WaitForChild("SpawnShapeshifter") :: BindableEvent
+	spawnShapeshifter.Event:Connect(Shapeshifter.spawnOne)
 
 	local dayState = ReplicatedStorage:WaitForChild("DayState")
 	local forceRule = debugActions:WaitForChild("ForceRuleDay") :: BindableEvent
