@@ -81,6 +81,17 @@ local GameConfig = {
 	AlienFearSpike = 60,
 	AlienSeverity = 12,
 
+	-- §9 gate sensors + upgrades (A-8): sensors flag suspicion, never decide (§3)
+	ScannerAccuracy = 0.75,
+	ScannerFalsePositive = 0.1,
+	ArchAccuracy = 0.9,
+	UpgradeCosts = { Scanner = 1500, Arch = 2500, BathroomLock = 250 },
+	UpgradeUnlockIndex = { Scanner = 250, Arch = 300, BathroomLock = 400 },
+	BuskerPatienceMultiplier = 0.5, -- §9: patience decay ×0.5 in busker radius
+	BuskerDefaultRadius = 25,
+	InfirmaryExamSeconds = 4,
+	SaltRange = 8, -- studs; nearest cultist within this evaporates (A-5b)
+
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,

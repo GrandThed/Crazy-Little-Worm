@@ -12,18 +12,26 @@ export type Hit = {
 
 export type Probe = (position: Vector3) -> Hit?
 
-local probes: { Probe } = {}
+-- Channels keep counter-items honest (§4): the net channel catches humanoid
+-- anomalies; the salt channel (A-5b) only ever touches cultists
+local probesByChannel: { [string]: { Probe } } = {}
 
 local NetTargets = {}
 
-function NetTargets.register(probe: Probe)
+function NetTargets.register(probe: Probe, channel: string?)
+	local key = channel or "net"
+	local probes = probesByChannel[key]
+	if not probes then
+		probes = {}
+		probesByChannel[key] = probes
+	end
 	table.insert(probes, probe)
 end
 
--- Nearest target within range across every registered anomaly, or nil
-function NetTargets.swing(position: Vector3, range: number): string?
+-- Nearest target within range across the channel's anomalies, or nil
+function NetTargets.swing(position: Vector3, range: number, channel: string?): string?
 	local best: Hit? = nil
-	for _, probe in probes do
+	for _, probe in probesByChannel[channel or "net"] or {} do
 		local hit = probe(position)
 		if
 			hit

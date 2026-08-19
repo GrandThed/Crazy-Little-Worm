@@ -10,9 +10,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Component = require(ReplicatedStorage.Shared.Component)
+local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
+local AnomalyBase = require(script.Parent.anomalies.AnomalyBase)
 local Guests = require(script.Parent.Guests)
+local TicketRules = require(script.Parent.TicketRules)
 
 local dayState = ReplicatedStorage:WaitForChild("DayState")
+local rng = Random.new()
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local decideRemote = Instance.new("RemoteEvent")
@@ -113,6 +117,33 @@ task.spawn(function()
 	end)
 end)
 
+-- §9 gate sensors (A-8), rolled once when a guest reaches the counter.
+-- They flag SUSPICION, never truth (§3): scanner ~75% accurate with ~10%
+-- false positives; the arch reads heartbeats (two = aliens, none = infected)
+-- with its own miss chance. The replicated attributes are noisy sensor
+-- output, not the server-only anomaly flag — the player still decides.
+local function runGateSensors(standPart: BasePart, guest: Guests.Guest)
+	local anomalyName = AnomalyBase.get(guest.id)
+	if standPart:GetAttribute("HasScanner") == true then
+		local bad = anomalyName ~= nil or not TicketRules.isValid(guest.identity.ticket)
+		local flagged = if bad
+			then rng:NextNumber() < GameConfig.ScannerAccuracy
+			else rng:NextNumber() < GameConfig.ScannerFalsePositive
+		guest.model:SetAttribute("ScannerFlag", if flagged then true else nil)
+	end
+	if standPart:GetAttribute("HasArch") == true then
+		local reading = "♥ normal"
+		if rng:NextNumber() < GameConfig.ArchAccuracy then
+			if anomalyName == "Aliens" then
+				reading = "♥♥ TWO heartbeats?!"
+			elseif anomalyName == "Infected" then
+				reading = "— no heartbeat…?"
+			end
+		end
+		guest.model:SetAttribute("ArchReading", reading)
+	end
+end
+
 -- Promotion loop: keep counters fed while the park is processing guests
 task.spawn(function()
 	while true do
@@ -120,7 +151,10 @@ task.spawn(function()
 		if phase == "Open" or phase == "Closing" then
 			for _, stand in Guests.getStands() do
 				if not stand.counterGuest then
-					Guests.promoteFront(stand.part)
+					local guest = Guests.promoteFront(stand.part)
+					if guest then
+						runGateSensors(stand.part, guest)
+					end
 				end
 			end
 		end

@@ -1,0 +1,33 @@
+{
+	"className": "Tool",
+	"properties": {
+		"ToolTip": "Salt Bucket — throw at cultists!"
+	},
+	"children": [
+		{
+			"name": "Handle",
+			"className": "Part",
+			"properties": {
+				"Size": [1.2, 1.2, 1.2],
+				"CFrame": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.75, 0.3, 0.25],
+				"Material": "SmoothPlastic",
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth",
+				"CanCollide": false
+			}
+		},
+		{
+			"name": "Salt",
+			"className": "Part",
+			"properties": {
+				"Size": [1, 0.3, 1],
+				"CFrame": [0, 0.7, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.97, 0.97, 0.95],
+				"Material": "Sand",
+				"CanCollide": false,
+				"Massless": true
+			}
+		}
+	]
+}

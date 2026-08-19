@@ -57,7 +57,7 @@ local card = Instance.new("Frame")
 card.Name = "TicketCard"
 card.AnchorPoint = Vector2.new(0.5, 1)
 card.Position = UDim2.new(0.5, 0, 1, -24)
-card.Size = UDim2.fromOffset(300, 210)
+card.Size = UDim2.fromOffset(300, 248)
 card.BackgroundColor3 = Color3.fromRGB(247, 241, 227)
 card.Parent = screenGui
 local cardCorner = Instance.new("UICorner")
@@ -117,6 +117,33 @@ do
 	spotCorner.CornerRadius = UDim.new(1, 0)
 	spotCorner.Parent = spot
 end
+
+-- §9 gate sensors (A-8): noisy suspicion readouts — the player still decides
+local scannerLabel = Instance.new("TextLabel")
+scannerLabel.Name = "ScannerFlag"
+scannerLabel.BackgroundTransparency = 1
+scannerLabel.Position = UDim2.fromOffset(18, 150)
+scannerLabel.Size = UDim2.new(1, -36, 0, 18)
+scannerLabel.TextColor3 = Color3.fromRGB(190, 120, 20)
+scannerLabel.Font = Enum.Font.GothamBold
+scannerLabel.TextSize = 13
+scannerLabel.TextXAlignment = Enum.TextXAlignment.Left
+scannerLabel.Text = "⚠ SCANNER: ticket looks off"
+scannerLabel.Visible = false
+scannerLabel.Parent = card
+
+local archLabel = Instance.new("TextLabel")
+archLabel.Name = "ArchReading"
+archLabel.BackgroundTransparency = 1
+archLabel.Position = UDim2.fromOffset(18, 168)
+archLabel.Size = UDim2.new(1, -36, 0, 18)
+archLabel.TextColor3 = Color3.fromRGB(150, 60, 90)
+archLabel.Font = Enum.Font.GothamBold
+archLabel.TextSize = 13
+archLabel.TextXAlignment = Enum.TextXAlignment.Left
+archLabel.Text = ""
+archLabel.Visible = false
+archLabel.Parent = card
 
 local closeButton = Instance.new("TextButton")
 closeButton.AnchorPoint = Vector2.new(1, 0)
@@ -254,9 +281,19 @@ local function renderGuest(guestModel: Model?)
 		approveButton.Visible = false
 		denyButton.Visible = false
 		stains.Visible = false
+		scannerLabel.Visible = false
+		archLabel.Visible = false
 		return
 	end
 	stains.Visible = guestModel:GetAttribute("TicketStained") == true
+	scannerLabel.Visible = guestModel:GetAttribute("ScannerFlag") == true
+	local archReading = guestModel:GetAttribute("ArchReading")
+	if typeof(archReading) == "string" then
+		archLabel.Text = ("ARCH: %s"):format(archReading)
+		archLabel.Visible = true
+	else
+		archLabel.Visible = false
+	end
 	body.Text = ("NAME    %s\nSERIAL  %s\nTYPE    %s\nDATE    %s"):format(
 		tostring(guestModel:GetAttribute("TicketName")),
 		tostring(guestModel:GetAttribute("TicketSerial")),

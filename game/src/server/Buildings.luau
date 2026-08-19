@@ -1,7 +1,9 @@
 --!strict
--- Anomaly-building components (§9): Security Camera (A-3), extended by A-8
--- with Infirmary and Queue Busker. Same data-driven rule as rides: behavior
--- binds to tagged models with attributes; PlotService drops them onto pads.
+-- Anomaly-building components (§9): Security Camera (A-3), Infirmary and
+-- Queue Busker (A-8). Same data-driven rule as rides: behavior binds to
+-- tagged models with attributes; PlotService drops them onto pads. This
+-- module never requires Guests (Guests queries the busker aura — keep the
+-- dependency one-way).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -76,6 +78,90 @@ function Buildings.cameraAlert(camera: Model)
 		billboard:Destroy()
 		sound:Destroy()
 	end)
+end
+
+-- ============================== infirmary (A-8) ==============================
+
+local infirmaries: { [Model]: boolean } = {}
+
+Component.bind("Infirmary", {
+	onAttached = function(instance)
+		if instance:IsA("Model") then
+			infirmaries[instance] = true
+			print(("[Buildings] infirmary open: %s"):format(instance.Name))
+		end
+	end,
+	onDetached = function(instance)
+		infirmaries[instance :: Model] = nil
+	end,
+})
+
+function Buildings.hasInfirmary(): boolean
+	return next(infirmaries) ~= nil
+end
+
+-- Nearest infirmary door spot for an escorted guest to walk to
+function Buildings.nearestInfirmary(position: Vector3): (Model?, Vector3?)
+	local best: Model? = nil
+	local bestSpot: Vector3? = nil
+	local bestDistance = math.huge
+	for infirmary in infirmaries do
+		local spot = modelGroundPosition(infirmary) + Vector3.new(0, 0, 4)
+		local distance = (spot - position).Magnitude
+		if distance < bestDistance then
+			bestDistance = distance
+			best = infirmary
+			bestSpot = spot
+		end
+	end
+	return best, bestSpot
+end
+
+-- ============================== queue busker (A-8) ==============================
+
+local buskers: { [Model]: boolean } = {}
+
+Component.bind("QueueBusker", {
+	onAttached = function(instance): BillboardGui?
+		if not instance:IsA("Model") then
+			return nil
+		end
+		buskers[instance] = true
+		print(("[Buildings] busker performing: %s"):format(instance.Name))
+		local base = instance:FindFirstChildWhichIsA("BasePart")
+		if not base then
+			return nil
+		end
+		local billboard = Instance.new("BillboardGui")
+		billboard.Size = UDim2.fromOffset(40, 40)
+		billboard.StudsOffsetWorldSpace = Vector3.new(0, 4, 0)
+		billboard.AlwaysOnTop = true
+		local label = Instance.new("TextLabel")
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.fromScale(1, 1)
+		label.TextScaled = true
+		label.Text = "🎵"
+		label.Parent = billboard
+		billboard.Parent = base
+		return billboard
+	end,
+	onDetached = function(instance, billboard: BillboardGui?)
+		buskers[instance :: Model] = nil
+		if billboard then
+			billboard:Destroy()
+		end
+	end,
+})
+
+-- §9: patience decay ×0.5 for queues inside a busker's radius
+function Buildings.buskerCovers(position: Vector3): boolean
+	for busker in buskers do
+		local radius = attributeNumber(busker, "Radius", GameConfig.BuskerDefaultRadius)
+		if (modelGroundPosition(busker) - position).Magnitude <= radius then
+			return true
+		end
+	end
+	return false
 end
 
 return Buildings

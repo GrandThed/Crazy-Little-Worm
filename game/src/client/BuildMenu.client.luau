@@ -15,6 +15,15 @@ local dayState = ReplicatedStorage:WaitForChild("DayState")
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local buildRemote = remotes:WaitForChild("Build") :: RemoteEvent
 local buildAckRemote = remotes:WaitForChild("BuildAck") :: RemoteEvent
+local buyUpgradeRemote = remotes:WaitForChild("BuyUpgrade") :: RemoteEvent
+local upgradeAckRemote = remotes:WaitForChild("UpgradeAck") :: RemoteEvent
+
+-- §9 gate upgrades (A-8): server auto-picks the first eligible stand/bathroom
+local UPGRADES: { { kind: string, label: string } } = {
+	{ kind = "Scanner", label = "Ticket Scanner" },
+	{ kind = "Arch", label = "Heartbeat Arch" },
+	{ kind = "BathroomLock", label = "Bathroom Lock" },
+}
 
 local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
@@ -69,6 +78,7 @@ plotLayout.Padding = UDim.new(0, 4)
 plotLayout.Parent = plotList
 
 local selectedEntry: Catalog.Entry? = nil
+local selectedUpgrade: string? = nil
 local pendingRequests: { [string]: boolean } = {}
 
 local function currentIndex(): number
@@ -118,6 +128,32 @@ local function refreshItems()
 		button.Activated:Connect(function()
 			if not locked then
 				selectedEntry = entry
+				selectedUpgrade = nil
+				refreshItems()
+				refreshPlots()
+			end
+		end)
+	end
+
+	-- Gate upgrades (A-8) below the plot buildables
+	for _, upgrade in UPGRADES do
+		local cost = GameConfig.UpgradeCosts[upgrade.kind]
+		local unlockIndex = GameConfig.UpgradeUnlockIndex[upgrade.kind]
+		local locked = index < unlockIndex
+		local label = if locked
+			then ("%s\n🔒 idx %d"):format(upgrade.label, unlockIndex)
+			else ("%s\n$%d"):format(upgrade.label, cost)
+		local button = makeRowButton(itemList, label)
+		if locked then
+			button.BackgroundColor3 = Color3.fromRGB(44, 47, 60)
+			button.TextColor3 = Color3.fromRGB(140, 145, 160)
+		elseif selectedUpgrade == upgrade.kind then
+			button.BackgroundColor3 = Color3.fromRGB(76, 132, 175)
+		end
+		button.Activated:Connect(function()
+			if not locked then
+				selectedUpgrade = upgrade.kind
+				selectedEntry = nil
 				refreshItems()
 				refreshPlots()
 			end
@@ -130,6 +166,22 @@ function refreshPlots()
 		if child:IsA("TextButton") or child:IsA("TextLabel") then
 			child:Destroy()
 		end
+	end
+	local upgradeKind = selectedUpgrade
+	if upgradeKind then
+		-- server auto-picks the first stand/bathroom without this upgrade
+		local button = makeRowButton(
+			plotList,
+			("Install (auto-picks target)\n$%d"):format(GameConfig.UpgradeCosts[upgradeKind])
+		)
+		button.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
+		button.Activated:Connect(function()
+			local requestId = HttpService:GenerateGUID(false)
+			pendingRequests[requestId] = true
+			buyUpgradeRemote:FireServer({ requestId = requestId, kind = upgradeKind })
+			button.Text = "…"
+		end)
+		return
 	end
 	local entry = selectedEntry
 	if not entry then
@@ -170,22 +222,23 @@ function refreshPlots()
 	end
 end
 
-buildAckRemote.OnClientEvent:Connect(
-	function(ack: { requestId: string, accepted: boolean, reason: string? })
-		if not pendingRequests[ack.requestId] then
-			return
-		end
-		pendingRequests[ack.requestId] = nil
-		if not ack.accepted then
-			toggleButton.Text = ack.reason or "rejected"
-			task.delay(1.2, function()
-				toggleButton.Text = "Build (Prep)"
-			end)
-		end
-		refreshItems()
-		refreshPlots()
+local function onAck(ack: { requestId: string, accepted: boolean, reason: string? })
+	if not pendingRequests[ack.requestId] then
+		return
 	end
-)
+	pendingRequests[ack.requestId] = nil
+	if not ack.accepted then
+		toggleButton.Text = ack.reason or "rejected"
+		task.delay(1.2, function()
+			toggleButton.Text = "Build (Prep)"
+		end)
+	end
+	refreshItems()
+	refreshPlots()
+end
+
+buildAckRemote.OnClientEvent:Connect(onAck)
+upgradeAckRemote.OnClientEvent:Connect(onAck)
 
 toggleButton.Activated:Connect(function()
 	panel.Visible = not panel.Visible

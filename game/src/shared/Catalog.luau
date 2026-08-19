@@ -152,6 +152,25 @@ local Catalog: { Entry } = {
 		tag = "SecurityCamera",
 		radius = 30,
 	},
+	{
+		id = "Infirmary",
+		name = "Infirmary",
+		kind = "Building",
+		cost = 1800,
+		unlockIndex = 0, -- §9 says "day 2"; index gating covers the spirit (v0)
+		template = "Infirmary",
+		tag = "Infirmary",
+	},
+	{
+		id = "QueueBusker",
+		name = "Queue Busker",
+		kind = "Building",
+		cost = 800,
+		unlockIndex = 200,
+		template = "QueueBusker",
+		tag = "QueueBusker",
+		radius = 25,
+	},
 }
 
 -- Plot acceptance (A-3): rides and facilities keep their dedicated pads;

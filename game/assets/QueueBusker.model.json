@@ -1,0 +1,46 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Stage",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"Size": [3, 0.6, 3],
+				"CFrame": [0, 0.3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.62, 0.42, 0.26],
+				"Material": "SmoothPlastic",
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Busker",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [1.2, 2.4, 0.8],
+				"CFrame": [0, 1.8, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.95, 0.66, 0.13],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Head",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Shape": "Ball",
+				"Size": [1, 1, 1],
+				"CFrame": [0, 3.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.96, 0.8, 0.65],
+				"Material": "SmoothPlastic"
+			}
+		}
+	],
+	"properties": {
+		"WorldPivot": [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+	}
+}

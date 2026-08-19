@@ -14,6 +14,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local Component = require(ReplicatedStorage.Shared.Component)
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local GuestIdentity = require(ReplicatedStorage.Shared.GuestIdentity)
+local Buildings = require(script.Parent.Buildings)
 local EconomyStore = require(script.Parent.EconomyStore)
 local TicketRules = require(script.Parent.TicketRules)
 
@@ -83,6 +84,7 @@ local anomalyMarkers: { [string]: (Guest) -> () } = {}
 local admittedCallbacks: { (Guest) -> () } = {}
 local drainedCallbacks: { () -> () } = {}
 local exitCallbacks: { (Guest, ExitReason) -> () } = {}
+local spawnedCallbacks: { (Guest) -> () } = {}
 
 -- Fired when a guest exits the park on their own feet (satisfaction input,
 -- §1 exit happiness). Zombified/captured guests never "exit".
@@ -102,6 +104,12 @@ end
 
 function Guests.onAdmitted(callback: (Guest) -> ())
 	table.insert(admittedCallbacks, callback)
+end
+
+-- Fired once per fresh arrival, after the model is in workspace (A-8:
+-- the infirmary escort prompt hangs off this)
+function Guests.onSpawned(callback: (Guest) -> ())
+	table.insert(spawnedCallbacks, callback)
 end
 
 function Guests.onDrained(callback: () -> ())
@@ -349,6 +357,9 @@ function Guests.spawnArrival(options: SpawnOptions?)
 	model.Parent = workspace
 	table.insert(active, guest)
 	dayStats:SetAttribute("GuestsOnMap", #active)
+	for _, callback in spawnedCallbacks do
+		callback(guest)
+	end
 end
 
 -- Move the front queued guest up to the counter. Returns it, or nil.
@@ -480,9 +491,14 @@ task.spawn(function()
 		end
 
 		for _, stand in stands do
+			-- §9 queue busker (A-8): halves patience decay in its radius
+			local standPosition = Vector3.new(stand.part.Position.X, 0, stand.part.Position.Z)
+			local standDecay = if Buildings.buskerCovers(standPosition)
+				then decay * GameConfig.BuskerPatienceMultiplier
+				else decay
 			local counterGuest = stand.counterGuest
 			if counterGuest then
-				counterGuest.patience -= decay
+				counterGuest.patience -= standDecay
 				if counterGuest.patience <= 0 then
 					walkAwayFromCounter(stand)
 				else
@@ -491,7 +507,7 @@ task.spawn(function()
 			end
 			for index = #stand.queue, 1, -1 do
 				local guest = stand.queue[index]
-				guest.patience -= decay
+				guest.patience -= standDecay
 				if guest.patience <= 0 then
 					walkAwayFromQueue(stand, index)
 				else
