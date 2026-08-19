@@ -46,8 +46,6 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 *(entire epic pulled as a batch 2026-08-18 at Benjamin's request — P-1 split into needs-decay/decisions + exit-happiness halves, delivered inside the batch)*
 
 ### Epic A — Full anomaly set (M3) — spec: §4, §5, §9
-- **A-1** (M) Anomaly scheduler · code: daily slots by index, 0.7 fill roll, pool gating, random spawn times · assets: none
-- **A-2** (S) Daily bulletin + first-appearance hints · code: bulletin UI in Prep, hint flags on save · assets: newspaper-style bulletin UI art
 - **A-3** (M) Corporate spy · code: tamper-target AI, camera alert building component · assets: briefcase + suit variants (innocent lookalikes too!), camera model, tamper anim
 - **A-4** (M) Aliens in a coat · code: ride overclock, e-stop panel interact, launch sequence · assets: trench-coat wobble rig (double height), e-stop panel, launch particles + sky sequence
 - **A-5** (L→split) The cult · code: serial-sequence ticket gen, trickle scheduler, bathroom convergence, ritual channel + kidnap, salt counter, police-bribe fine at Summary · assets: amulet accessory, candle set, bathroom plume particle, salt bucket + throw anim
@@ -83,7 +81,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-*(empty — groom from Backlog)*
+- **A-1** (M) Anomaly scheduler · code: daily slots `1+floor(idx/250)` capped by pool, ~0.7 fill roll per slot, tier gating by index (§4: <200 infected+aliens, ≥200 +spy, ≥400 +cult, ≥600 +shapeshifter), random spawn times — replaces the interim day-2 roll in `AnomalyService` · assets: none · ✔ debug readout shows rolled slots/types each day; only unlocked types ever spawn
+- **A-2** (S) Daily bulletin + first-appearance hints · code: bulletin UI in Prep (rule delta + forecast + themed first-appearance warnings), hint flags server-side (save-slot state later in S-1) · assets: newspaper-style bulletin UI (placeholder styling fine) · ✔ the morning an anomaly type debuts, its themed warning appears in the bulletin
 
 ---
 
@@ -95,17 +94,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 👀 Review
 
-**Epic P batch (all M2 feature cards) — consolidated Studio test, ~20 min with debug speed:**
-
-1. **P-2 plots/build**: Prep → Build menu → carousel + bathroom pre-built; buy a Snack Cart ($300) on a facility plot, cash drops; Bumper Cars needs $900 (loan if short); locked rides show 🔒 idx
-2. **P-3 rides**: Open gates (×5 speed), approve guests — they walk to rides, board seats, ride runs, they leave and pick a new target
-3. **P-4 facilities**: guests visit snack cart (cash ticks +$5) and bathroom
-4. **P-1 needs**: guests alternate rides/food/bathroom on their own; during an outbreak, guests near zombies flee to the exit (scared exits in summary satisfaction)
-5. **P-5 index**: debug panel `index` rises as you build (idx 130 → ~200+ with bumper cars); arrivals/min visibly increases
-6. **P-6 breakdowns**: on day 2 the carousel breaks (sparks) shortly after opening; hire a Mechanic (Staff menu) → orange NPC walks over, repairs, sparks stop
-7. **P-7 clerk**: hire Clerk T1, walk away from the stand — clerk processes the queue alone (~6/min); walk close — clerk defers to you
-8. **P-8 summary**: Summary shows stars + stats breakdown (entry/food/wages/loan/net) + Reviews tab with event-matched reviews
-9. **P-9 floor**: spend to near zero, end day with staff — unpayable staff quits; Take Loan button (+$2000) appears in Prep, repays 10%/day; index never below 50
+*(empty)*
 
 ---
 
@@ -113,7 +102,11 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## ✅ Done
 
-**🏁 M1 Playable gate loop complete (2026-08-18) — current milestone: M2 Park sim**
+**🏁 M2 Park sim complete (2026-08-18) — current milestone: M3 Full anomaly set**
+
+- **Epic P batch** (P-1…P-9) · ✔ Studio-tested 2026-08-18 via consolidated 9-point checklist: plots/build, ride cycles, facilities, needs AI, live index driving arrivals, day-2 breakdown + mechanic, clerk, summary v1 with reviews, loan/staff-quit floor (after WorldPivot placement fix)
+
+**🏁 M1 Playable gate loop complete (2026-08-18)**
 
 - **G-9** (M) **Fun-check playtest** · ✔ 3 days played, verdict **GO** (game-design.md §11); outbreak-at-real-speed retest confirmed after dwell fix
 

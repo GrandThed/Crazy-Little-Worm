@@ -4,7 +4,9 @@ Roblox amusement-park management game crossed with anomaly-game mechanics. Playe
 
 ## Status
 
-Greenfield — architecture decided, nothing scaffolded yet. No git repo initialized yet.
+**M0–M2 complete (2026-08-18); current milestone: M3 Full anomaly set (Epic A).** The park sim runs end-to-end grey-box: gate loop (guest stream, ticket inspection with optimistic acks, patience/walkaways, day cycle, economy, Infected anomaly + capture net), tycoon layer (plots/build menu, ride + facility components, needs AI, live attraction index driving arrivals, breakdowns + mechanic, clerk NPC, summary with reviews, anti-soft-lock loan). GitHub repo `GrandThed/Crazy-Little-Worm`, CI green. See [BOARD.md](BOARD.md) Done column for the card-by-card record.
+
+Key runtime shape (all server modules in `game/src/server/`): `Guests` (lifecycle/queues) · `Attractions` (ride/facility components + provider API) · `GuestNeeds` (needs AI driver) · `IndexStore` (attraction index) · `EconomyStore` (cash/loan) · `Staff` (clerk/mechanic NPCs) · `anomalies/` (AnomalyBase registry + Infected) · thin driver scripts (DayCycle, GuestSpawner, GateService, PlotService, AnomalyService, ToolRackService, DebugService). Grey-box assets are Rojo `.model.json` files in `game/assets/` (author `WorldPivot` at ground level, identity rotation — placement is pure translation) synced to `ServerStorage.Assets`; map geometry lives in the bootstrap project → `places/park.rbxl`.
 
 ## Design pillars
 
@@ -67,10 +69,10 @@ Task tracking lives in [BOARD.md](BOARD.md) (kanban) — view it as a board with
 
 ## Build order
 
-1. Rojo + toolchain skeleton, empty park place, git init.
-2. Ticket-check / anomaly prototype (core loop).
-3. Tycoon layer with tagged-component rides.
-4. Rooms/browser last — MemoryStore behind `RoomService`.
+1. ~~Rojo + toolchain skeleton, empty park place, git init.~~ ✅ M0
+2. ~~Ticket-check / anomaly prototype (core loop).~~ ✅ M1
+3. ~~Tycoon layer with tagged-component rides.~~ ✅ M2
+4. **Full anomaly set (Epic A / M3) ← current**, then persistence (S), rooms/browser (R), polish (Q).
 
 ## Conventions
 
