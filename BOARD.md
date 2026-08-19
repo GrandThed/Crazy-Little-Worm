@@ -87,13 +87,25 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-- **Epic P batch** (P-2 → P-3 → P-4 → P-1 → P-5 → P-6 → P-7 → P-8 → P-9, dependency order) · consolidated Studio test checklist lands with the final commit
+*(empty — pull from Ready)*
 
 ---
 
 ## 👀 Review
 
-*(empty)*
+**Epic P batch (all M2 feature cards) — consolidated Studio test, ~20 min with debug speed:**
+
+1. **P-2 plots/build**: Prep → Build menu → carousel + bathroom pre-built; buy a Snack Cart ($300) on a facility plot, cash drops; Bumper Cars needs $900 (loan if short); locked rides show 🔒 idx
+2. **P-3 rides**: Open gates (×5 speed), approve guests — they walk to rides, board seats, ride runs, they leave and pick a new target
+3. **P-4 facilities**: guests visit snack cart (cash ticks +$5) and bathroom
+4. **P-1 needs**: guests alternate rides/food/bathroom on their own; during an outbreak, guests near zombies flee to the exit (scared exits in summary satisfaction)
+5. **P-5 index**: debug panel `index` rises as you build (idx 130 → ~200+ with bumper cars); arrivals/min visibly increases
+6. **P-6 breakdowns**: on day 2 the carousel breaks (sparks) shortly after opening; hire a Mechanic (Staff menu) → orange NPC walks over, repairs, sparks stop
+7. **P-7 clerk**: hire Clerk T1, walk away from the stand — clerk processes the queue alone (~6/min); walk close — clerk defers to you
+8. **P-8 summary**: Summary shows stars + stats breakdown (entry/food/wages/loan/net) + Reviews tab with event-matched reviews
+9. **P-9 floor**: spend to near zero, end day with staff — unpayable staff quits; Take Loan button (+$2000) appears in Prep, repays 10%/day; index never below 50
+
+---
 
 ---
 
