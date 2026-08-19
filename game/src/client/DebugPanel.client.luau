@@ -132,6 +132,17 @@ makeButton("Give $500", function()
 	debugCommand:FireServer("GiveCash", 500)
 end)
 
+-- Cycles 0 → +200 → +400 → +600 → 0: reach idx-gated unlocks in one sitting
+makeButton("Index boost cycle 📈", function()
+	local current = workspace:GetAttribute("DebugIndexBoost")
+	local boost = if typeof(current) == "number" then current else 0
+	boost += 200
+	if boost > 600 then
+		boost = 0
+	end
+	debugCommand:FireServer("BoostIndex", boost)
+end)
+
 makeButton("Spawn infected 🧟", function()
 	debugCommand:FireServer("SpawnInfected")
 end)

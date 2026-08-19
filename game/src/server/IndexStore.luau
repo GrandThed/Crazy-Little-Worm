@@ -34,7 +34,11 @@ local function compute(): number
 		appealSum += attributeNumber(model, "BaseAppeal", 0) * (1 + 0.25 * (tier - 1)) * conditionFactor
 	end
 	local parkAppeal = 6 * appealSum ^ 0.9 -- diminishing returns
-	local index = math.clamp(parkAppeal * (0.5 + 0.5 * satisfaction) - incidentP, 50, 1000)
+	-- Studio-only test knob (Epic A): only the Studio-gated debug command ever
+	-- sets this; lets one sitting reach idx-gated unlocks (camera/salt/clipboard)
+	local boostValue = workspace:GetAttribute("DebugIndexBoost")
+	local boost = if typeof(boostValue) == "number" then boostValue else 0
+	local index = math.clamp(parkAppeal * (0.5 + 0.5 * satisfaction) - incidentP + boost, 50, 1000)
 	state:SetAttribute("Index", index)
 	state:SetAttribute("Satisfaction", satisfaction)
 	return index

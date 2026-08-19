@@ -57,6 +57,11 @@ debugCommand.OnServerEvent:Connect(function(player, command: unknown, value: unk
 			workspace:SetAttribute("DaySpeedMultiplier", value)
 			print(("[Debug] %s set day speed ×%d"):format(player.Name, value))
 		end
+	elseif command == "BoostIndex" then
+		if typeof(value) == "number" and value >= 0 and value <= 800 then
+			workspace:SetAttribute("DebugIndexBoost", value)
+			print(("[Debug] %s set index boost +%d"):format(player.Name, value))
+		end
 	elseif command == "GiveCash" then
 		if typeof(value) == "number" and value >= 1 and value <= 100000 then
 			EconomyStore.add(value)
