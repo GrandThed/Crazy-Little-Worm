@@ -46,12 +46,14 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 *(entire epic pulled as a batch 2026-08-18 at Benjamin's request — P-1 split into needs-decay/decisions + exit-happiness halves, delivered inside the batch)*
 
 ### Epic A — Full anomaly set (M3) — spec: §4, §5, §9
-- **A-3** (M) Corporate spy · code: tamper-target AI, camera alert building component · assets: briefcase + suit variants (innocent lookalikes too!), camera model, tamper anim
-- **A-4** (M) Aliens in a coat · code: ride overclock, e-stop panel interact, launch sequence · assets: trench-coat wobble rig (double height), e-stop panel, launch particles + sky sequence
-- **A-5** (L→split) The cult · code: serial-sequence ticket gen, trickle scheduler, bathroom convergence, ritual channel + kidnap, salt counter, police-bribe fine at Summary · assets: amulet accessory, candle set, bathroom plume particle, salt bucket + throw anim
-- **A-6** (M) Shapeshifter · code: staff replacement, do-nothing mimic behaviors (clerk floodgate!), clipboard inspect · assets: idle-stance tell anim, clipboard model + inspect UI
-- **A-7** (S) Ticket-rule days · code: rule generator, validity checker, bulletin announcement · assets: none
-- **A-8** (S) Remaining tools/buildings · code: component each · assets: scanner, heartbeat arch, infirmary, bathroom lock, queue busker grey-boxes
+*(entire epic pulled as a batch 2026-08-19, Epic P precedent — A-5 split into infiltration + ritual halves during grooming; A-8 resized S→M honestly: it's five components plus a purchase flow)*
+- **A-3** (M) Corporate spy · code: `anomalies/Spy`, `anomalies/NetTargets` registry (net targets beyond zombies), `Buildings` camera component, `Building` catalog kind through PlotService/BuildMenu, businessman lookalikes in guest gen · assets: SecurityCamera grey-box `.model.json`; suit + briefcase as code-attached grey-box parts · ✔ spy enters with briefcase + wrong-date ticket while innocent businessmen also exist; each tamper drops a ride's condition 40% (breakdown under 30%, severity 6); a camera in radius pings and reveals the tamper; the net catches a spy in the act
+- **A-4** (M) Aliens in a coat · code: `anomalies/Aliens`, wobble walk, e-stop prompt per ride, overclock + launch sequence, plot freed on ride destruction · assets: e-stop panel + launch effects as code-side grey-box · ✔ a double-height wobbling guest holds a Child ticket; inside, it targets the fastest ride and overclocks it for 60s with a visible ramp; e-stop resets the ride and exposes the alien (nettable); unchecked, the ride launches into space — destroyed, Fear spike, severity 12, plot reusable
+- **A-5a** (M) The cult — infiltration (split from A-5 L) · code: `anomalies/Cult` member gen + across-the-day trickle, consecutive-serial same-date tickets · assets: amulet grey-box part · ✔ on a cult day, 4–6 members trickle in spread across the whole day wearing matching amulets and carrying consecutive serials; individually harmless inside
+- **A-5b** (M) The cult — ritual + salt (split from A-5 L) · code: bathroom convergence at ≥4 admitted, kidnap occupants, 180s ritual channel (+60s locked bathroom), plume, disappearances + police-bribe fine at Summary, salt counter, tool-rack generalization (buy-once racks) · assets: SaltBucket `.model.json`; candles + plume as code-side effects · ✔ at 4 admitted cultists they converge on a bathroom, kidnap its occupants, and channel under a plume visible from outside; salting them below 4 aborts the ritual and rescued guests thumbs-up and carry on; a completed ritual disappears the kidnapped — 200 police-bribe fine each on the Summary stats page
+- **A-6** (M) Shapeshifter · code: `anomalies/Shapeshifter`, staff person-names + nameplates + idle-bob tell, mimic behaviors (clerk floodgate approves everyone, mechanic never repairs), clipboard inspect · assets: Clipboard `.model.json` · ✔ its ticket Name matches a rostered staff member; 120s after admission it replaces an isolated staff NPC; the mimic never does its idle bob; clipboard inspect reveals it (severity 10, staff lost, nettable) or gives real staff a thumbs-up
+- **A-7** (S) Ticket-rule days · code: `TicketRules` roll from day 3 (~40% of days), violator ticket gen, clerk validity check, counterfeit fines at Summary, bulletin rule line · assets: none · ✔ on a rule day the bulletin announces the rule, violating tickets appear in the guest stream, and every admitted violator lands a fine line on the Summary stats page
+- **A-8** (M) Remaining tools/buildings · code: gate-upgrade purchase flow (Ticket Scanner + Heartbeat Arch per stand, Bathroom Lock per bathroom), Infirmary + Queue Busker buildings, infirmary escort prompt, buy-once tool racks · assets: Infirmary + QueueBusker grey-box `.model.json`; scanner/arch/padlock as code-side parts · ✔ scanner flags suspicion (~75% accuracy, ~10% false positives) and arch reads heartbeats on the inspection card — player still decides; infirmary escort cures a dormant infected (thumbs-up otherwise); a locked bathroom delays the ritual; busker halves patience decay in its radius
 
 ### Epic S — Persistence (M4) — spec: server-architecture skill
 - **S-1** (M) ProfileStore integration · code: save shape v1, load at boot, autosave, BindToClose · assets: none
@@ -81,14 +83,15 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔜 Ready (max ~5 cards; criteria + code/assets lines required)
 
-- **A-1** (M) Anomaly scheduler · code: daily slots `1+floor(idx/250)` capped by pool, ~0.7 fill roll per slot, tier gating by index (§4: <200 infected+aliens, ≥200 +spy, ≥400 +cult, ≥600 +shapeshifter), random spawn times — replaces the interim day-2 roll in `AnomalyService` · assets: none · ✔ debug readout shows rolled slots/types each day; only unlocked types ever spawn
-- **A-2** (S) Daily bulletin + first-appearance hints · code: bulletin UI in Prep (rule delta + forecast + themed first-appearance warnings), hint flags server-side (save-slot state later in S-1) · assets: newspaper-style bulletin UI (placeholder styling fine) · ✔ the morning an anomaly type debuts, its themed warning appears in the bulletin
+*(empty — Epic A pulled as a batch)*
 
 ---
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-*(empty — pull from Ready)*
+- **Epic A batch** (A-1, A-2, A-3, A-4, A-5a, A-5b, A-6, A-7, A-8) — dependency order A-1 → A-2 → A-7 → A-3 → A-4 → A-8 → A-5a → A-5b → A-6; per-card commits; one consolidated Studio checklist lands in Review on completion. Groomed A-1/A-2 cards absorbed from Ready:
+  - **A-1** (M) Anomaly scheduler · code: daily slots `1+floor(idx/250)` capped by pool, ~0.7 fill roll per slot, tier gating by index (§4: <200 infected+aliens, ≥200 +spy, ≥400 +cult, ≥600 +shapeshifter), random spawn times — replaces the interim day-2 roll in `AnomalyService` · assets: none · ✔ debug readout shows rolled slots/types each day; only unlocked types ever spawn
+  - **A-2** (S) Daily bulletin + first-appearance hints · code: bulletin UI in Prep (rule delta + forecast + themed first-appearance warnings), hint flags server-side (save-slot state later in S-1) · assets: newspaper-style bulletin UI (placeholder styling fine) · ✔ the morning an anomaly type debuts, its themed warning appears in the bulletin
 
 ---
 
