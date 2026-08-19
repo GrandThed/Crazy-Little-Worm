@@ -11,6 +11,8 @@ local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local Infected = require(script.Parent.anomalies.Infected)
 local Scheduler = require(script.Parent.anomalies.Scheduler)
 
+require(script.Parent.Bulletin) -- composes the morning edition on plan roll (A-2)
+
 -- §4 pool (tier gates in GameConfig.AnomalyMinIndex); later cards append here
 Scheduler.register({
 	name = "Infected",
