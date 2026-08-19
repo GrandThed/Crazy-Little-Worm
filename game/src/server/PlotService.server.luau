@@ -81,6 +81,16 @@ local function buildOn(plotPart: BasePart, entry: Catalog.Entry): Model?
 
 	plots[plotPart] = model
 	plotPart:SetAttribute("OccupiedBy", entry.id)
+	-- A-4: a destroyed building (ride launched into space…) frees its plot
+	model.AncestryChanged:Connect(function(_, parent)
+		if parent == nil and plots[plotPart] == model then
+			plots[plotPart] = nil
+			plotPart:SetAttribute("OccupiedBy", nil)
+			print(
+				("[Plot] plot %s is free again"):format(tostring(plotPart:GetAttribute("PlotId")))
+			)
+		end
+	end)
 	print(
 		("[Plot] built %s on plot %s"):format(entry.name, tostring(plotPart:GetAttribute("PlotId")))
 	)

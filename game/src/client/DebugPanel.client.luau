@@ -140,6 +140,10 @@ makeButton("Spawn spy 🕵️", function()
 	debugCommand:FireServer("SpawnSpy")
 end)
 
+makeButton("Spawn aliens 👽", function()
+	debugCommand:FireServer("SpawnAlien")
+end)
+
 makeButton("Force rule day 📜", function()
 	debugCommand:FireServer("ForceRuleDay")
 end)

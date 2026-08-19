@@ -71,6 +71,16 @@ local GameConfig = {
 	SpyRevealSeconds = 8, -- camera ping keeps them highlighted/nettable this long
 	CameraDefaultRadius = 30,
 
+	-- §4 aliens in a coat (A-4): 60s overclock on the fastest ride, e-stop
+	-- resets + exposes, unchecked = launch (ride destroyed, severity 12)
+	AlienScaleMultiplier = 2.0, -- on top of the guest's rolled scale ("9ft tall")
+	AlienActivationDelay = { 10, 30 },
+	AlienChannelSeconds = 60,
+	AlienSpeedRank = { low = 1, mid = 2, high = 3 },
+	AlienFearRadius = 35,
+	AlienFearSpike = 60,
+	AlienSeverity = 12,
+
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,

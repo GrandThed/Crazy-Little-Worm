@@ -26,6 +26,7 @@ local ACTION_NAMES = {
 	"SapPatience",
 	"SpawnInfected",
 	"SpawnSpy",
+	"SpawnAlien",
 	"ForceRuleDay",
 }
 

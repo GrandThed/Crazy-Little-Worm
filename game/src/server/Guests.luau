@@ -51,6 +51,7 @@ export type Guest = {
 	needs: Needs, -- §1 needs system (GuestNeeds drives decay/decisions)
 	busy: boolean, -- riding/using a facility; ignored by zombies + decisions
 	wasAdmitted: boolean,
+	wobble: boolean?, -- §4 aliens: tipsy sway applied by the glide loop (A-4)
 }
 
 export type SpawnOptions = {
@@ -584,7 +585,12 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		else
 			local step = math.min(guest.speed * deltaTime, delta.Magnitude)
 			local nextPosition = flat + delta.Unit * step + lift
-			guest.model:PivotTo(CFrame.lookAt(nextPosition, nextPosition + delta.Unit))
+			local cf = CFrame.lookAt(nextPosition, nextPosition + delta.Unit)
+			if guest.wobble then
+				-- §4 aliens gate tell: three people in a coat walk like this
+				cf *= CFrame.Angles(0, 0, math.sin(os.clock() * 7) * 0.16)
+			end
+			guest.model:PivotTo(cf)
 		end
 	end
 end)
