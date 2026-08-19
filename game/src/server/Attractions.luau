@@ -402,4 +402,20 @@ Guests.onDrained(function()
 	end
 end)
 
+-- §8 teaching beat: scripted carousel breakdown on day 2 (P-6)
+task.spawn(function()
+	local dayState = ReplicatedStorage:WaitForChild("DayState")
+	local done = false
+	dayState:GetAttributeChangedSignal("Phase"):Connect(function()
+		if
+			not done
+			and dayState:GetAttribute("Phase") == "Open"
+			and dayState:GetAttribute("Day") == 2
+		then
+			done = true
+			Attractions.weakenStarterRide()
+		end
+	end)
+end)
+
 return Attractions

@@ -65,6 +65,14 @@ local GameConfig = {
 	RideConditionPerCycle = 2, -- condition lost per operating cycle (P-6)
 	FacilityCapacity = 2,
 
+	-- §6/§9 staff: wages daily at Summary, no hire fee
+	ClerkWages = { 100, 150, 220 }, -- per tier
+	ClerkAccuracy = { 0.5, 0.65, 0.8 }, -- §3 detection accuracy by tier
+	ClerkFalsePositiveChance = 0.05, -- §3 ~5% deny-an-innocent
+	ClerkSecondsPerGuest = 10, -- §3 throughput ~6 guests/min
+	MechanicWage = 120,
+	MechanicRepairPerSecond = 2,
+
 	-- v0 dwell (G-9 finding): admitted guests wander the park this long before
 	-- heading home — must exceed infected incubation or outbreaks can't happen.
 	-- P-1 needs AI replaces this with real behavior-driven dwell.
