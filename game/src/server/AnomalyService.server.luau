@@ -9,6 +9,7 @@ local ServerStorage = game:GetService("ServerStorage")
 
 local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local Aliens = require(script.Parent.anomalies.Aliens)
+local Cult = require(script.Parent.anomalies.Cult)
 local Infected = require(script.Parent.anomalies.Infected)
 local Scheduler = require(script.Parent.anomalies.Scheduler)
 local Spy = require(script.Parent.anomalies.Spy)
@@ -33,6 +34,12 @@ Scheduler.register({
 	minIndex = GameConfig.AnomalyMinIndex.Aliens,
 	spawn = Aliens.spawnOne,
 })
+Scheduler.register({
+	name = "Cult",
+	minIndex = GameConfig.AnomalyMinIndex.Cult,
+	spawn = Cult.beginDay,
+	trickle = true, -- §4: members insert across the whole day
+})
 
 -- Debug hooks (F-5): force an arrival of each type / force a rule day now
 task.spawn(function()
@@ -43,6 +50,8 @@ task.spawn(function()
 	spawnSpy.Event:Connect(Spy.spawnOne)
 	local spawnAlien = debugActions:WaitForChild("SpawnAlien") :: BindableEvent
 	spawnAlien.Event:Connect(Aliens.spawnOne)
+	local spawnCultists = debugActions:WaitForChild("SpawnCultists") :: BindableEvent
+	spawnCultists.Event:Connect(Cult.debugBatch)
 
 	local dayState = ReplicatedStorage:WaitForChild("DayState")
 	local forceRule = debugActions:WaitForChild("ForceRuleDay") :: BindableEvent

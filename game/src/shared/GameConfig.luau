@@ -92,6 +92,13 @@ local GameConfig = {
 	InfirmaryExamSeconds = 4,
 	SaltRange = 8, -- studs; nearest cultist within this evaporates (A-5b)
 
+	-- §4 the cult (A-5a/A-5b): trickle across the day, ritual at ≥4 admitted
+	CultMemberCount = { 4, 6 },
+	CultMinMembers = 4, -- ritual threshold; salting below it aborts
+	CultRitualSeconds = 180,
+	CultLockDelaySeconds = 60, -- §9 bathroom lock: +60s of picking first
+	CultConvergeTimeoutSeconds = 45, -- stragglers don't stall the ritual forever
+
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit
 	NetCooldownSeconds = 1,
