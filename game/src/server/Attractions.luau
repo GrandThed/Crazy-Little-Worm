@@ -298,6 +298,21 @@ function Attractions.repairTick(model: Model, amount: number): boolean
 	return condition >= 100
 end
 
+-- Cult kidnap (A-5b): pull every guest out of a facility mid-refill and hand
+-- them to the caller. Their needs stay un-refilled — they have bigger problems.
+function Attractions.evictOccupants(model: Model): { Guests.Guest }
+	local evicted: { Guests.Guest } = {}
+	local facility = facilities[model]
+	if facility then
+		for occupant in facility.occupants do
+			occupant.busy = false
+			table.insert(evicted, occupant)
+		end
+		table.clear(facility.occupants)
+	end
+	return evicted
+end
+
 -- Spy sabotage (A-3), per §4: condition −40; below the threshold the ride
 -- breaks on the spot. Severity is charged by the caller. Returns broke.
 function Attractions.sabotage(model: Model, amount: number): boolean
