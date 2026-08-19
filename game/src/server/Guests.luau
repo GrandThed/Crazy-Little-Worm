@@ -540,6 +540,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 				reportExit(guest, "left")
 				removeGuest(guest)
 			elseif guest.state == "Fleeing" then
+				dayStats:SetAttribute("Fled", (dayStats:GetAttribute("Fled") :: number? or 0) + 1)
 				reportExit(guest, "fled")
 				removeGuest(guest)
 			end

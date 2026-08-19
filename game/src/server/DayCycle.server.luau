@@ -34,6 +34,7 @@ dayStats:SetAttribute("Captured", 0)
 dayStats:SetAttribute("FoodIncome", 0)
 dayStats:SetAttribute("Breakdowns", 0)
 dayStats:SetAttribute("Wages", 0)
+dayStats:SetAttribute("Fled", 0)
 dayStats.Parent = ServerStorage
 
 local remotes = Instance.new("Folder")
@@ -48,6 +49,17 @@ local daySummaryRemote = Instance.new("RemoteEvent")
 daySummaryRemote.Name = "DaySummary"
 daySummaryRemote.Parent = remotes
 remotes.Parent = ReplicatedStorage
+
+-- Required AFTER the folders above exist (their init waits on DayStats/Remotes)
+local ReviewTemplates = require(ReplicatedStorage.Shared.ReviewTemplates)
+local EconomyStore = require(script.Parent.EconomyStore)
+local IndexStore = require(script.Parent.IndexStore)
+local Staff = require(script.Parent.Staff)
+
+local staffQuitToday = 0
+Staff.onQuit(function()
+	staffQuitToday += 1
+end)
 
 local currentDay = 1
 local currentPhase = "Prep"
@@ -108,6 +120,13 @@ local function resetStats()
 	dayStats:SetAttribute("FoodIncome", 0)
 	dayStats:SetAttribute("Breakdowns", 0)
 	dayStats:SetAttribute("Wages", 0)
+	dayStats:SetAttribute("Fled", 0)
+	staffQuitToday = 0
+end
+
+local function statNumber(name: string): number
+	local value = dayStats:GetAttribute(name)
+	return if typeof(value) == "number" then value else 0
 end
 
 openGatesRemote.OnServerEvent:Connect(function()
@@ -142,12 +161,35 @@ task.spawn(function()
 		waitForAdvance()
 
 		setPhase("Summary")
+		-- Summary v1 (P-8): settle wages + loan first so the numbers are final
+		local wagesPaid = Staff.settleWages()
+		local loanRepaid = EconomyStore.repayLoanDaily()
+		local satisfaction = IndexStore.getSatisfaction()
+		local stars = math.clamp(math.floor(1 + 4 * satisfaction + 0.5), 1, 5)
+		local reviews = ReviewTemplates.pick({
+			zombies = statNumber("Zombies"),
+			captured = statNumber("Captured"),
+			breakdowns = statNumber("Breakdowns"),
+			walkaways = statNumber("Walkaways"),
+			fled = statNumber("Fled"),
+			staffQuit = staffQuitToday,
+			loanBalance = EconomyStore.getLoanBalance(),
+			stars = stars,
+		}, 3)
 		daySummaryRemote:FireAllClients({
 			day = currentDay,
-			arrivals = dayStats:GetAttribute("Arrivals"),
-			admissions = dayStats:GetAttribute("Admissions"),
-			income = dayStats:GetAttribute("Income"),
-			walkaways = dayStats:GetAttribute("Walkaways"),
+			arrivals = statNumber("Arrivals"),
+			admissions = statNumber("Admissions"),
+			walkaways = statNumber("Walkaways"),
+			income = statNumber("Income"),
+			foodIncome = statNumber("FoodIncome"),
+			wages = wagesPaid,
+			loanRepaid = loanRepaid,
+			zombies = statNumber("Zombies"),
+			captured = statNumber("Captured"),
+			breakdowns = statNumber("Breakdowns"),
+			stars = stars,
+			reviews = reviews,
 		})
 		waitForAdvance()
 

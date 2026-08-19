@@ -12,6 +12,7 @@ local GameConfig = require(ReplicatedStorage.Shared.GameConfig)
 local state = Instance.new("Folder")
 state.Name = "EconomyState"
 state:SetAttribute("Cash", GameConfig.StartingCash)
+state:SetAttribute("LoanBalance", 0)
 state.Parent = ReplicatedStorage
 
 local EconomyStore = {}
@@ -36,5 +37,49 @@ function EconomyStore.trySpend(amount: number): boolean
 	state:SetAttribute("Cash", cash - amount)
 	return true
 end
+
+-- §7 anti-soft-lock loan (P-9): +2000 cash, one loan at a time
+function EconomyStore.getLoanBalance(): number
+	return state:GetAttribute("LoanBalance") :: number
+end
+
+function EconomyStore.takeLoan(): boolean
+	if EconomyStore.getLoanBalance() > 0 then
+		return false
+	end
+	state:SetAttribute("LoanBalance", 2000)
+	EconomyStore.add(2000)
+	print("[Economy] loan taken: +$2000 (auto-repays 10%/day)")
+	return true
+end
+
+-- Called at Summary: auto-repay 10% of the balance, limited by cash on hand
+-- (cash never goes negative). Returns what was actually repaid.
+function EconomyStore.repayLoanDaily(): number
+	local balance = EconomyStore.getLoanBalance()
+	if balance <= 0 then
+		return 0
+	end
+	local due = math.ceil(balance * 0.1)
+	local payment = math.min(due, EconomyStore.getCash())
+	if payment > 0 then
+		state:SetAttribute("Cash", EconomyStore.getCash() - payment)
+		state:SetAttribute("LoanBalance", balance - payment)
+	end
+	return payment
+end
+
+-- Loan remote (deferred: Remotes folder is created by DayCycle)
+task.spawn(function()
+	local remotes = ReplicatedStorage:WaitForChild("Remotes")
+	local loanRemote = Instance.new("RemoteEvent")
+	loanRemote.Name = "TakeLoan"
+	loanRemote.Parent = remotes
+	loanRemote.OnServerEvent:Connect(function(player)
+		if EconomyStore.takeLoan() then
+			print(("[Economy] %s took the loan"):format(player.Name))
+		end
+	end)
+end)
 
 return EconomyStore
