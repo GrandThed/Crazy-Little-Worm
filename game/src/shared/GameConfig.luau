@@ -45,6 +45,12 @@ local GameConfig = {
 	ZombieScareRadius = 9, -- studs; admitted guests flee zombies inside this
 	-- §8: day 1 is the only guaranteed-safe day; slots fill with p≈0.7
 	AnomalyFillChance = 0.7,
+	-- §2/§4 scheduler (A-1): slots = 1 + floor(idx / AnomalySlotsPer), capped;
+	-- tier gates per type; spawn times land in this fraction-of-Open window
+	AnomalySlotsPer = 250,
+	AnomalySlotCap = 5,
+	AnomalyMinIndex = { Infected = 0, Aliens = 0, Spy = 200, Cult = 400, Shapeshifter = 600 },
+	AnomalySpawnWindow = { 0.05, 0.85 },
 
 	-- §4 counter-item: capture net (G-7)
 	NetRange = 7, -- studs; nearest zombie/tagged guest within this gets hit

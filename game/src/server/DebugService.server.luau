@@ -88,6 +88,7 @@ if RunService:IsStudio() then
 				debugState:SetAttribute(attribute, dayStats:GetAttribute(attribute) or 0)
 			end
 			debugState:SetAttribute("DaySpeed", workspace:GetAttribute("DaySpeedMultiplier") or 1)
+			debugState:SetAttribute("AnomalyPlan", dayStats:GetAttribute("AnomalyPlan") or "…")
 			task.wait(0.5)
 		end
 	end)

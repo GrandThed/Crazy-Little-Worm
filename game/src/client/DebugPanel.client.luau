@@ -93,6 +93,11 @@ title.TextColor3 = Color3.fromRGB(255, 200, 80)
 
 local statsLabel = makeLabel("…")
 
+-- A-1: today's rolled anomaly plan (server truth, Studio mirror only)
+local planLabel = makeLabel("plan …")
+planLabel.TextWrapped = true
+planLabel.TextColor3 = Color3.fromRGB(235, 160, 120)
+
 makeButton("Skip phase ⏭", function()
 	debugCommand:FireServer("AdvancePhase")
 end)
@@ -150,6 +155,9 @@ task.spawn(function()
 			("satisf  %.2f"):format(tonumber(indexState:GetAttribute("Satisfaction")) or 0),
 		}
 		statsLabel.Text = table.concat(lines, "\n")
+		planLabel.Text = ("plan    %s"):format(
+			tostring(debugState:GetAttribute("AnomalyPlan") or "…")
+		)
 		task.wait(0.25)
 	end
 end)
