@@ -46,7 +46,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 *(entire epic pulled as a batch 2026-08-18 at Benjamin's request — P-1 split into needs-decay/decisions + exit-happiness halves, delivered inside the batch)*
 
 ### Epic A — Full anomaly set (M3) — spec: §4, §5, §9
-*(entire epic pulled as a batch 2026-08-19, Epic P precedent — A-5 split into infiltration + ritual halves during grooming; A-8 resized S→M honestly: it's five components plus a purchase flow)*
+*(entire epic pulled as a batch 2026-08-19, Epic P precedent — A-5 split into infiltration + ritual halves during grooming; A-8 resized S→M honestly: it's five components plus a purchase flow. Code complete same day → consolidated checklist in Review)*
 - **A-3** (M) Corporate spy · code: `anomalies/Spy`, `anomalies/NetTargets` registry (net targets beyond zombies), `Buildings` camera component, `Building` catalog kind through PlotService/BuildMenu, businessman lookalikes in guest gen · assets: SecurityCamera grey-box `.model.json`; suit + briefcase as code-attached grey-box parts · ✔ spy enters with briefcase + wrong-date ticket while innocent businessmen also exist; each tamper drops a ride's condition 40% (breakdown under 30%, severity 6); a camera in radius pings and reveals the tamper; the net catches a spy in the act
 - **A-4** (M) Aliens in a coat · code: `anomalies/Aliens`, wobble walk, e-stop prompt per ride, overclock + launch sequence, plot freed on ride destruction · assets: e-stop panel + launch effects as code-side grey-box · ✔ a double-height wobbling guest holds a Child ticket; inside, it targets the fastest ride and overclocks it for 60s with a visible ramp; e-stop resets the ride and exposes the alien (nettable); unchecked, the ride launches into space — destroyed, Fear spike, severity 12, plot reusable
 - **A-5a** (M) The cult — infiltration (split from A-5 L) · code: `anomalies/Cult` member gen + across-the-day trickle, consecutive-serial same-date tickets · assets: amulet grey-box part · ✔ on a cult day, 4–6 members trickle in spread across the whole day wearing matching amulets and carrying consecutive serials; individually harmless inside
@@ -89,15 +89,32 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-- **Epic A batch** (A-1, A-2, A-3, A-4, A-5a, A-5b, A-6, A-7, A-8) — dependency order A-1 → A-2 → A-7 → A-3 → A-4 → A-8 → A-5a → A-5b → A-6; per-card commits; one consolidated Studio checklist lands in Review on completion. Groomed A-1/A-2 cards absorbed from Ready:
-  - **A-1** (M) Anomaly scheduler · code: daily slots `1+floor(idx/250)` capped by pool, ~0.7 fill roll per slot, tier gating by index (§4: <200 infected+aliens, ≥200 +spy, ≥400 +cult, ≥600 +shapeshifter), random spawn times — replaces the interim day-2 roll in `AnomalyService` · assets: none · ✔ debug readout shows rolled slots/types each day; only unlocked types ever spawn
-  - **A-2** (S) Daily bulletin + first-appearance hints · code: bulletin UI in Prep (rule delta + forecast + themed first-appearance warnings), hint flags server-side (save-slot state later in S-1) · assets: newspaper-style bulletin UI (placeholder styling fine) · ✔ the morning an anomaly type debuts, its themed warning appears in the bulletin
+*(empty — pull from Ready)*
 
 ---
 
 ## 👀 Review
 
-*(empty)*
+- **Epic A batch** (A-1, A-2, A-3, A-4, A-5a, A-5b, A-6, A-7, A-8) — code complete 2026-08-19, per-card commits `b325781…d21c13c` (+ debug index-boost knob). Card details in the Backlog Epic A section. Groomed A-1/A-2 absorbed from Ready:
+  - **A-1** (M) Anomaly scheduler · ✔ debug readout shows rolled slots/types each day; only unlocked types ever spawn
+  - **A-2** (S) Daily bulletin + first-appearance hints · ✔ the morning an anomaly type debuts, its themed warning appears in the bulletin
+
+  **Studio setup first (map edits in `places/park.rbxl`, one-time):**
+  - Add two rack parts tagged `ToolRack` with attribute `Tool = "SaltBucket"` and `Tool = "Clipboard"` (the existing rack defaults to `CaptureNet`). Racks are now buy-once: first grab pays (§9 prices), then free grabs — retest the net rack accordingly.
+  - Optional but recommended: a few pads tagged `Plot` with `PlotKind = "Building"` near rides (cameras need coverage); Building items also accept free Facility pads.
+
+  **Consolidated Studio test checklist** (debug panel: day speed ×20, "Index boost cycle 📈" reaches idx-gated unlocks; every anomaly has a spawn button so scheduler gating never blocks a test):
+  1. **A-1 scheduler** — day 1 plan reads "safe" in the debug panel; from day 2 the plan line shows slots/types with times; with boost 0 only Infected/Aliens are ever drawn; cycle boost to +400/+600 across a few days and see spy/cult/shapeshifter enter the pool (shapeshifter only once staff exist). Quiet days (empty slots) happen.
+  2. **A-2 bulletin** — the Worm Daily auto-opens each Prep with a turnout forecast; the morning a type is first drawn, its themed warning appears (and never appears again after); 📰 button reopens it.
+  3. **A-7 rule day** — "Force rule day 📜" during Prep: the bulletin gains a TODAY'S RULE line; violating tickets appear in the stream (~15%); approving violators puts a fines line on the Summary stats page; a clerk denies some violators too.
+  4. **A-3 spy** — "Spawn spy 🕵️": suit + briefcase, ticket date is wrong; innocent suits with briefcases also exist (~7% of adults — deny-all-suits must feel wrong). Admitted, it walks to the best ride and sparks for 15s → condition −40 (watch ride attributes / a second tamper breaks it, index dips). With a camera covering the ride: ❗ ping + red highlight — net it mid-tamper. It leaves after 3 rides if unbothered.
+  5. **A-4 aliens** — "Spawn aliens 👽": double-height wobbler, Child ticket (arch reads ♥♥ if bought). Admitted, it heads to the fastest ride; hum/shake/particles ramp for 60s; e-stop prompt on the ride resets it and drops the coat (green, nettable, flees). Let one finish once: liftoff, ride destroyed, plot frees for rebuild next Prep, guests scatter, index takes −12.
+  6. **A-8 sensors** — with boost: buy Ticket Scanner and Heartbeat Arch from the Build menu Upgrades rows (Prep) → suspicion strip / heartbeat line on the inspection card, including occasional false positives on honest guests (player still decides).
+  7. **A-8 infirmary + busker + lock** — build Infirmary: escort prompt on admitted guests; escorting a dormant cougher cures (Cured stat), a healthy guest gets a thumbs-up. Queue Busker near the gate: sap patience and compare emote decay rates inside/outside its radius. Bathroom Lock: padlock visual + Locked attr.
+  8. **A-5a cult** — "Spawn cultists 🕯": amulets on chests, consecutive same-letter serials on the same date, otherwise ordinary guests.
+  9. **A-5b ritual** — admit 4: they converge on a bathroom, candles + purple plume visible across the park, occupants kidnapped (😱). Salt (buy at idx 400 boost) one cultist below 4 → ritual collapses, rescued thumbs-up and resume. Run it again and let it complete (180s; locked bathroom +60s): kidnapped vanish, Summary shows 200/guest police bribe + a cult review.
+  10. **A-6 shapeshifter** — hire a clerk + mechanic: person names on nameplates and in the Staff menu roster; idle staff visibly bob. "Spawn shapeshifter 🎭": ticket Name matches a rostered staffer. Admit and walk far away: after ~120s a shimmer — the mimic never bobs, the clerk-mimic approves EVERYONE (watch anomalies pour in), the mechanic-mimic ignores a breakdown. Clipboard (idx 600 boost) on real staff → ✓; on the mimic → reveal: severity 10, staff line gone from roster, grey imposter sprints for the exit — nettable.
+  11. **Regression** — infected loop still works end-to-end (tells, incubation, cascade, net, infirmary cure); capture net now costs $500 once (day 2+) then free grabs; Summary numbers still reconcile (entry + food − wages − loan − fines = net); 2-player co-op check deferred to next co-op session; CI green.
 
 ---
 
