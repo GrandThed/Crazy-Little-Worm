@@ -70,8 +70,10 @@ local function buildOn(plotPart: BasePart, entry: Catalog.Entry): Model?
 		model:SetAttribute("Revenue", entry.revenue or 0)
 	end
 
-	local extents = model:GetExtentsSize()
-	model:PivotTo(CFrame.new(plotPart.Position.X, extents.Y / 2 + 0.4, plotPart.Position.Z))
+	-- Templates author their WorldPivot at ground level with identity rotation,
+	-- so placement is pure translation onto the pad top (never re-orients —
+	-- a rotated first part used to tip whole models sideways)
+	model:PivotTo(CFrame.new(plotPart.Position.X, 0.4, plotPart.Position.Z))
 	model.Parent = workspace
 	model:AddTag(entry.kind) -- binds RideService / FacilityService components
 

@@ -6,9 +6,30 @@
 			"className": "Part",
 			"properties": {
 				"Anchored": true,
-				"Size": [4, 3, 2],
-				"CFrame": [0, 1.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-				"Color": [0.94, 0.82, 0.26],
+				"Size": [
+					4,
+					3,
+					2
+				],
+				"CFrame": [
+					0,
+					1.5,
+					0,
+					1,
+					0,
+					0,
+					0,
+					1,
+					0,
+					0,
+					0,
+					1
+				],
+				"Color": [
+					0.94,
+					0.82,
+					0.26
+				],
 				"Material": "SmoothPlastic",
 				"TopSurface": "Smooth",
 				"BottomSurface": "Smooth"
@@ -20,11 +41,48 @@
 			"properties": {
 				"Anchored": true,
 				"CanCollide": false,
-				"Size": [4.6, 0.3, 2.8],
-				"CFrame": [0, 3.4, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-				"Color": [0.88, 0.34, 0.31],
+				"Size": [
+					4.6,
+					0.3,
+					2.8
+				],
+				"CFrame": [
+					0,
+					3.4,
+					0,
+					1,
+					0,
+					0,
+					0,
+					1,
+					0,
+					0,
+					0,
+					1
+				],
+				"Color": [
+					0.88,
+					0.34,
+					0.31
+				],
 				"Material": "SmoothPlastic"
 			}
 		}
-	]
+	],
+	"properties": {
+		"WorldPivot": [
+			0,
+			0,
+			0,
+			1,
+			0,
+			0,
+			0,
+			1,
+			0,
+			0,
+			0,
+			1
+		]
+	}
 }
