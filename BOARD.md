@@ -76,6 +76,8 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 - **Q-5** (S) Invite prompt when queue exceeds staffed capacity · code only
 - **Q-6** (M) Review template catalog to ~40 entries · writing only
 - **Q-7** (M) Sound & music pass · assets: park ambience loop, per-anomaly stingers, ritual drone
+- **Q-8** (M) Ride tier upgrades · code: upgrade flow in PlotService + BuildMenu (§9: tier 1→3, upgrade = 50% of base cost, +25% appeal per tier — IndexStore already reads the Tier attr) · assets: per-tier grey-box accent (e.g. topper color) · ✔ upgrading a built ride visibly raises its appeal and the attraction index
+- **Q-9** (M) Inspection refinement pass · from G-9 finding: ticket loop is playable but needs texture to carry the game — revisit AFTER A-7 rule days + subtler anomalies exist · code: TBD from a focused playtest (candidate knobs: ticket field variety, inspection tools UX, stamp pacing) · assets: TBD · ✔ playtest verdict flips to "inspection carries the game"
 
 ---
 
