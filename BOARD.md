@@ -43,15 +43,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ### Epic G — Gate loop (M1) — spec: design doc §1, §3, §4 (infected)
 
 ### Epic P — Park sim (M2) — spec: §1, §2, §5, §6, §9
-- **P-1** (L→split) Guest needs AI · code: needs decay, urgency decisions, state machine, exit happiness · assets: none (uses guest rig)
-- **P-2** (M) Plot system + build menu · code: plot component, catalog data module, build UI · assets: plot marker model, park map blockout with plots `.rbxm`
-- **P-3** (M) Rides as components · code: ride base (capacity, ride loop, Fun refill, condition attr) · assets: carousel + bumper cars grey-box with seat parts
-- **P-4** (S) Facilities · code: refill components · assets: snack cart + bathroom grey-box
-- **P-5** (M) Attraction index live · code: index calc + arrivals formula wired to real park state · assets: none
-- **P-6** (M) Breakdowns + Mechanic · code: condition decay, breakdown events, mechanic NPC AI, scripted day-2 breakdown · assets: mechanic uniform variant, wrench, spark particle
-- **P-7** (M) Ticket Clerk NPC · code: clerk AI (throughput, accuracy by tier), wages at Summary · assets: clerk uniform variant
-- **P-8** (M) Summary v1 · code: statistics page, review page, event-log → review-template picker · assets: review page UI art (Google-reviews pastiche), ~15 seed templates (writing)
-- **P-9** (S) Anti-soft-lock floor · code: index clamp, loan button, staff-quit on zero cash · assets: none
+*(entire epic pulled as a batch 2026-08-18 at Benjamin's request — P-1 split into needs-decay/decisions + exit-happiness halves, delivered inside the batch)*
 
 ### Epic A — Full anomaly set (M3) — spec: §4, §5, §9
 - **A-1** (M) Anomaly scheduler · code: daily slots by index, 0.7 fill roll, pool gating, random spawn times · assets: none
@@ -95,19 +87,23 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 
 ## 🔨 In Progress (WIP ≤ 2 per person)
 
-*(empty — pull from Ready)*
+- **Epic P batch** (P-2 → P-3 → P-4 → P-1 → P-5 → P-6 → P-7 → P-8 → P-9, dependency order) · consolidated Studio test checklist lands with the final commit
 
 ---
 
 ## 👀 Review
 
-- **G-9** (M) **Fun-check playtest** · owner: **Benjamin** · ✔ 3 days played, verdict **GO**, findings in [game-design.md §11](docs/game-design.md) · *one retest pending: outbreak at real speed now that guests dwell 3–5 min (was: despawned in ~15 s, park empty before incubation — fixed)*
+*(empty)*
 
 ---
 
 ## ✅ Done
 
-**🏁 M0 Foundation complete (2026-08-18) — current milestone: M1 Playable gate loop**
+**🏁 M1 Playable gate loop complete (2026-08-18) — current milestone: M2 Park sim**
+
+- **G-9** (M) **Fun-check playtest** · ✔ 3 days played, verdict **GO** (game-design.md §11); outbreak-at-real-speed retest confirmed after dwell fix
+
+**🏁 M0 Foundation complete (2026-08-18)**
 
 - **G-7** (S) Capture net + tool rack · ✔ Studio-tested 2026-08-18: solo containment of a 3-zombie outbreak; puff + thumbs-up resolution
 - **G-6** (M) Infected end-to-end · ✔ Studio-tested 2026-08-18: tells at gate, incubation, chase + tag cascade past 3 zombies

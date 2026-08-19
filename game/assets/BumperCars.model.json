@@ -1,0 +1,54 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Floor",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"Size": [14, 0.8, 10],
+				"CFrame": [0, 0.4, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.28, 0.3, 0.38],
+				"Material": "SmoothPlastic",
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Car1",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [2, 1.2, 3],
+				"CFrame": [-4, 1.4, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.88, 0.34, 0.31],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Car2",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [2, 1.2, 3],
+				"CFrame": [3, 1.4, 1, 0, 0, 1, 0, 1, 0, -1, 0, 0],
+				"Color": [0.25, 0.55, 0.84],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Car3",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [2, 1.2, 3],
+				"CFrame": [0, 1.4, -3, 0, 0, -1, 0, 1, 0, 1, 0, 0],
+				"Color": [0.94, 0.82, 0.26],
+				"Material": "SmoothPlastic"
+			}
+		}
+	]
+}

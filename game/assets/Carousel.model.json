@@ -1,0 +1,92 @@
+{
+	"className": "Model",
+	"children": [
+		{
+			"name": "Base",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"Shape": "Cylinder",
+				"Size": [1, 12, 12],
+				"CFrame": [0, 0.5, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1],
+				"Color": [0.93, 0.6, 0.25],
+				"Material": "SmoothPlastic",
+				"TopSurface": "Smooth",
+				"BottomSurface": "Smooth"
+			}
+		},
+		{
+			"name": "Pole",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [0.8, 7, 0.8],
+				"CFrame": [0, 4.5, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.85, 0.82, 0.75],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Roof",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Shape": "Cylinder",
+				"Size": [0.8, 13, 13],
+				"CFrame": [0, 8.2, 0, 0, -1, 0, 1, 0, 0, 0, 0, 1],
+				"Color": [0.88, 0.34, 0.31],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Seat1",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [1.6, 1.6, 1.6],
+				"CFrame": [4, 1.8, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.25, 0.55, 0.84],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Seat2",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [1.6, 1.6, 1.6],
+				"CFrame": [-4, 1.8, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.94, 0.82, 0.26],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Seat3",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [1.6, 1.6, 1.6],
+				"CFrame": [0, 1.8, 4, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.37, 0.73, 0.37],
+				"Material": "SmoothPlastic"
+			}
+		},
+		{
+			"name": "Seat4",
+			"className": "Part",
+			"properties": {
+				"Anchored": true,
+				"CanCollide": false,
+				"Size": [1.6, 1.6, 1.6],
+				"CFrame": [0, 1.8, -4, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+				"Color": [0.67, 0.4, 0.84],
+				"Material": "SmoothPlastic"
+			}
+		}
+	]
+}
