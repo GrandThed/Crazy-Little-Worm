@@ -96,6 +96,7 @@ The component system is what makes stage 6 free — that's why F-4 is in the fir
 ## 👀 Review
 
 - **Epic A batch** (A-1, A-2, A-3, A-4, A-5a, A-5b, A-6, A-7, A-8) — code complete 2026-08-19, per-card commits `b325781…d21c13c` (+ debug index-boost knob). Card details in the Backlog Epic A section. Groomed A-1/A-2 absorbed from Ready:
+  - *Review fix 2026-08-20* (report: "can't buy anything from the tool rack"): locked racks rendered NO prompt at all (disabled ProximityPrompts are invisible) — prompts now stay visible with a 🔒 unlock label / buy price / take state, and a failed buy flashes "Need $N!" (`1c75039`). Retest under checklist item 11.
   - **A-1** (M) Anomaly scheduler · ✔ debug readout shows rolled slots/types each day; only unlocked types ever spawn
   - **A-2** (S) Daily bulletin + first-appearance hints · ✔ the morning an anomaly type debuts, its themed warning appears in the bulletin
 
