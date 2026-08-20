@@ -72,14 +72,6 @@ local racks: { [BasePart]: ProximityPrompt } = {}
 local promptFlashUntil: { [BasePart]: number } = {} -- feedback overrides the label briefly
 local swingCooldowns: { [Player]: number } = {}
 
--- A prompt with Enabled=false doesn't render AT ALL, so a locked rack must
--- stay enabled and say WHY it's locked (review finding: racks looked dead)
-local function lockText(def: ToolDef): string
-	return if def.unlockIndex
-		then ("🔒 Unlocks at index %d"):format(def.unlockIndex)
-		else ("🔒 Unlocks on day %d"):format(def.unlockDay or 1)
-end
-
 local function flashPrompt(rack: BasePart, text: string)
 	local prompt = racks[rack]
 	if prompt then
@@ -205,11 +197,7 @@ end
 local function onRackTriggered(player: Player, rack: BasePart)
 	local toolName = rackToolName(rack)
 	local def = TOOLS[toolName]
-	if not def then
-		return
-	end
-	if not toolUnlocked(def) then
-		flashPrompt(rack, lockText(def))
+	if not def or not toolUnlocked(def) then
 		return
 	end
 	if not toolOwned(toolName) then
@@ -225,8 +213,10 @@ local function onRackTriggered(player: Player, rack: BasePart)
 	giveTool(player, toolName, def)
 end
 
--- Prompt text tracks unlock/purchase state (cheap polling; racks are few).
--- Prompts stay Enabled ALWAYS — locked racks must be visible and say why.
+-- Prompt state tracks unlock/purchase (cheap polling; racks are few).
+-- Design call (2026-08-20): a rack is VISIBLE ONLY once its tool is unlocked
+-- — locked racks show nothing, the bulletin/shop tiers do the teasing. A
+-- failed buy still flashes "Need $N!" on the visible prompt.
 task.spawn(function()
 	while true do
 		for rack, prompt in racks do
@@ -236,14 +226,12 @@ task.spawn(function()
 			local toolName = rackToolName(rack)
 			local def = TOOLS[toolName]
 			if not def then
-				prompt.ActionText = "…?"
-				prompt.ObjectText = ("Tool Rack (unknown tool %q)"):format(toolName)
+				prompt.Enabled = false
 				continue
 			end
-			prompt.ObjectText = ("Tool Rack — %s"):format(def.display)
-			if not toolUnlocked(def) then
-				prompt.ActionText = lockText(def)
-			else
+			prompt.Enabled = toolUnlocked(def)
+			if prompt.Enabled then
+				prompt.ObjectText = ("Tool Rack — %s"):format(def.display)
 				prompt.ActionText = if toolOwned(toolName)
 					then ("Take %s"):format(def.display)
 					else ("Buy %s ($%d)"):format(def.display, def.cost)
@@ -260,6 +248,7 @@ Component.bind("ToolRack", {
 		end
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "TakeToolPrompt"
+		prompt.Enabled = false -- the state loop shows it once the tool unlocks
 		prompt.ActionText = "…"
 		prompt.ObjectText = "Tool Rack"
 		prompt.RequiresLineOfSight = false
