@@ -69,7 +69,24 @@ local TOOLS: { [string]: ToolDef } = {
 }
 
 local racks: { [BasePart]: ProximityPrompt } = {}
+local promptFlashUntil: { [BasePart]: number } = {} -- feedback overrides the label briefly
 local swingCooldowns: { [Player]: number } = {}
+
+-- A prompt with Enabled=false doesn't render AT ALL, so a locked rack must
+-- stay enabled and say WHY it's locked (review finding: racks looked dead)
+local function lockText(def: ToolDef): string
+	return if def.unlockIndex
+		then ("🔒 Unlocks at index %d"):format(def.unlockIndex)
+		else ("🔒 Unlocks on day %d"):format(def.unlockDay or 1)
+end
+
+local function flashPrompt(rack: BasePart, text: string)
+	local prompt = racks[rack]
+	if prompt then
+		prompt.ActionText = text
+		promptFlashUntil[rack] = os.clock() + 1.5
+	end
+end
 
 local function playSoundAt(parent: Instance, soundId: string, pitch: number)
 	local sound = Instance.new("Sound")
@@ -188,12 +205,17 @@ end
 local function onRackTriggered(player: Player, rack: BasePart)
 	local toolName = rackToolName(rack)
 	local def = TOOLS[toolName]
-	if not def or not toolUnlocked(def) then
+	if not def then
+		return
+	end
+	if not toolUnlocked(def) then
+		flashPrompt(rack, lockText(def))
 		return
 	end
 	if not toolOwned(toolName) then
 		-- §9 buy-once: the first grab pays the catalog price for the whole park
 		if not EconomyStore.trySpend(def.cost) then
+			flashPrompt(rack, ("Need $%d!"):format(def.cost))
 			print(("[ToolRack] not enough cash for the %s"):format(def.display:lower()))
 			return
 		end
@@ -203,25 +225,25 @@ local function onRackTriggered(player: Player, rack: BasePart)
 	giveTool(player, toolName, def)
 end
 
--- Prompt text tracks unlock/purchase state (cheap polling; racks are few)
+-- Prompt text tracks unlock/purchase state (cheap polling; racks are few).
+-- Prompts stay Enabled ALWAYS — locked racks must be visible and say why.
 task.spawn(function()
 	while true do
 		for rack, prompt in racks do
+			if (promptFlashUntil[rack] or 0) > os.clock() then
+				continue -- feedback flash owns the label for a moment
+			end
 			local toolName = rackToolName(rack)
 			local def = TOOLS[toolName]
 			if not def then
-				prompt.Enabled = false
-				prompt.ObjectText = "Tool Rack (?)"
+				prompt.ActionText = "…?"
+				prompt.ObjectText = ("Tool Rack (unknown tool %q)"):format(toolName)
 				continue
 			end
+			prompt.ObjectText = ("Tool Rack — %s"):format(def.display)
 			if not toolUnlocked(def) then
-				prompt.Enabled = false
-				prompt.ObjectText = if def.unlockIndex
-					then ("%s — unlocks at index %d"):format(def.display, def.unlockIndex)
-					else ("%s — unlocks day %d"):format(def.display, def.unlockDay or 1)
+				prompt.ActionText = lockText(def)
 			else
-				prompt.Enabled = true
-				prompt.ObjectText = "Tool Rack"
 				prompt.ActionText = if toolOwned(toolName)
 					then ("Take %s"):format(def.display)
 					else ("Buy %s ($%d)"):format(def.display, def.cost)
@@ -238,7 +260,7 @@ Component.bind("ToolRack", {
 		end
 		local prompt = Instance.new("ProximityPrompt")
 		prompt.Name = "TakeToolPrompt"
-		prompt.ActionText = "Take Tool"
+		prompt.ActionText = "…"
 		prompt.ObjectText = "Tool Rack"
 		prompt.RequiresLineOfSight = false
 		prompt.MaxActivationDistance = 8
